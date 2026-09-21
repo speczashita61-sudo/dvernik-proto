@@ -180,6 +180,89 @@ svg.icon{width:20px; height:20px; flex-shrink:0; stroke:currentColor; fill:none;
 .myday-widget{transition:opacity 200ms ease-out;}
 .myday-note{display:flex; align-items:center; gap:8px; font-size:12px; color:var(--secondary); margin-bottom:16px;}
 
+/* ===== КОНФИГУРАТОР (структура/приёмы door-cpq, дизайн SN) ===== */
+.cpq-tabs{display:flex; gap:8px; overflow-x:auto; padding-bottom:4px; margin-bottom:16px;}
+.cpq-tab{flex-shrink:0; padding:9px 16px; border-radius:20px; border:1px solid var(--border); background:var(--surface); color:var(--secondary); font-weight:600; font-size:12.5px; cursor:pointer; min-height:38px; transition:background 150ms ease-out,border-color 150ms ease-out,color 150ms ease-out;}
+.cpq-tab:hover{border-color:var(--accent);}
+.cpq-tab.active{background:var(--accent); border-color:var(--accent); color:#fff;}
+
+.cpq-layout{display:flex; flex-direction:column; gap:20px;}
+@media (min-width:900px){
+  .cpq-layout{flex-direction:row; align-items:flex-start;}
+  .cpq-preview{position:sticky; top:0; flex:0 0 320px;}
+  .cpq-steps{flex:1; min-width:0;}
+}
+.cpq-preview{background:var(--surface); border:1px solid var(--border); border-radius:var(--radius-lg); padding:20px; text-align:center; box-shadow:var(--shadow-sm);}
+.cpq-stage{width:100%; max-width:220px; margin:14px auto; aspect-ratio:1/1.7; display:flex; align-items:center; justify-content:center;}
+.cpq-stage svg{width:100%; height:100%; transition:transform 200ms ease-out;}
+.cpq-meta{font-size:12.5px; color:var(--secondary); margin-top:6px; line-height:1.5;}
+.cpq-meta b{color:var(--fg);}
+.cpq-specs{margin-top:16px; padding-top:14px; border-top:1px solid var(--border); text-align:left;}
+.cpq-specs dl{margin:8px 0 0; display:flex; flex-direction:column; gap:6px;}
+.cpq-specs div{display:flex; justify-content:space-between; gap:8px; font-size:12px;}
+.cpq-specs dt{color:var(--secondary);}
+.cpq-specs dd{margin:0; font-weight:600; text-align:right;}
+
+.cpq-step{padding:18px 0; border-bottom:1px solid var(--border);}
+.cpq-step:first-child{padding-top:0;}
+.cpq-step:last-child{border-bottom:none;}
+.cpq-step-head{display:flex; align-items:center; gap:8px; margin-bottom:14px;}
+.cpq-step-head h3{font-size:13px; text-transform:uppercase; letter-spacing:.04em; color:var(--secondary); font-weight:700;}
+
+.cpq-swiper{display:flex; gap:10px; overflow-x:auto; padding:2px 2px 10px;}
+.cpq-tile{
+  flex:0 0 132px; width:132px; display:flex; flex-direction:column; align-items:center; gap:6px; text-align:center;
+  background:var(--surface); border:1.5px solid var(--border); border-radius:var(--radius-md); padding:10px; cursor:pointer;
+  transition:border-color 150ms ease-out, box-shadow 150ms ease-out; position:relative; min-height:44px;
+}
+.cpq-tile:hover{border-color:var(--accent);}
+.cpq-tile.active{border-color:var(--accent); box-shadow:0 0 0 3px var(--accent-soft);}
+.cpq-tile.disabled{opacity:.45; cursor:not-allowed;}
+.cpq-tile-thumb{width:100%; aspect-ratio:1/1; border-radius:8px; background:var(--surface-2); display:flex; align-items:center; justify-content:center; color:var(--secondary); overflow:hidden;}
+.cpq-tile-thumb svg{width:60%; height:60%;}
+.cpq-tile-name{font-size:12px; font-weight:600; line-height:1.3;}
+.cpq-tile-price{font-size:11.5px; font-weight:700; color:var(--accent);}
+.cpq-tile-price s{color:var(--secondary); font-weight:500; margin-right:3px;}
+.cpq-tile-badge{position:absolute; top:6px; right:6px; font-size:9px; font-weight:700; padding:2px 6px; border-radius:8px;}
+.cpq-tile-badge.sale{background:var(--warning-soft); color:var(--warning);}
+.cpq-tile-badge.oos{background:var(--danger-soft); color:var(--danger);}
+.cpq-tile-check{position:absolute; top:6px; left:6px; width:18px; height:18px; border-radius:50%; background:var(--accent); color:#fff; display:none; align-items:center; justify-content:center;}
+.cpq-tile.active .cpq-tile-check{display:flex;}
+.cpq-tile-colors{display:flex; gap:4px; margin-top:2px; flex-wrap:wrap; justify-content:center;}
+.cpq-color-dot{width:16px; height:16px; border-radius:50%; border:1.5px solid var(--border); cursor:pointer; padding:0;}
+.cpq-color-dot.active{border-color:var(--accent); box-shadow:0 0 0 2px var(--accent-soft);}
+
+.cpq-finish-grid{display:grid; grid-template-columns:1fr 1fr; gap:16px;}
+@media (max-width:600px){.cpq-finish-grid{grid-template-columns:1fr;}}
+.cpq-finish-col{display:flex; flex-direction:column; gap:8px;}
+.cpq-finish-col label{font-size:12px; font-weight:600; color:var(--secondary);}
+
+.cpq-totalbar{
+  position:sticky; bottom:0; z-index:10; margin-top:20px; background:var(--primary); color:var(--on-primary);
+  border-radius:var(--radius-lg); padding:14px 20px; display:flex; align-items:center; justify-content:space-between;
+  gap:14px; flex-wrap:wrap; box-shadow:var(--shadow-lg);
+}
+@media (max-width:760px){.cpq-totalbar{bottom:64px;}}
+.cpq-total-info{display:flex; align-items:baseline; gap:12px; flex-wrap:wrap;}
+.cpq-total-price{font-size:22px; font-weight:700; font-variant-numeric:tabular-nums;}
+.cpq-total-price s{opacity:.6; font-size:14px; margin-right:6px; font-weight:500;}
+.cpq-total-link{background:none; border:none; color:var(--on-primary); opacity:.8; text-decoration:underline; font-size:12px; cursor:pointer; min-height:32px;}
+.cpq-total-link:hover{opacity:1;}
+.cpq-total-actions{display:flex; gap:8px; flex-wrap:wrap;}
+.cpq-btn-ghost-inv{background:transparent; border:1px solid rgba(255,255,255,.4); color:var(--on-primary); border-radius:var(--radius-sm); padding:0 16px; min-height:40px; font-weight:600; font-size:13px; cursor:pointer;}
+.cpq-btn-ghost-inv:hover{border-color:rgba(255,255,255,.8);}
+
+.cpq-cart{margin-top:12px; background:var(--surface); border:1px solid var(--border); border-radius:var(--radius-md); padding:14px 16px;}
+.cpq-cart-head{display:flex; align-items:center; gap:12px; font-weight:700; margin-bottom:8px;}
+.cpq-cart-row{display:flex; align-items:center; gap:10px; padding:8px 0; border-top:1px solid var(--border); font-size:12.5px;}
+.cpq-cart-row:first-of-type{border-top:none;}
+.cpq-qty{display:flex; align-items:center; gap:6px;}
+.cpq-qty button{width:24px; height:24px; border-radius:6px; border:1px solid var(--border); background:var(--surface-2); cursor:pointer;}
+
+.cpq-breakdown{margin-top:12px; background:var(--surface-2); border-radius:var(--radius-md); padding:14px 16px;}
+.cpq-breakdown-row{display:flex; justify-content:space-between; font-size:12.5px; padding:5px 0; color:var(--secondary);}
+.cpq-breakdown-row b{color:var(--fg); font-weight:600;}
+
 /* ===== TOPBAR ===== */
 .topbar{
   grid-row:1; grid-column:2; height:64px; background:var(--surface); border-bottom:1px solid var(--border);
@@ -1604,72 +1687,283 @@ th.sortable:hover{color:var(--fg);}
     </div>
   </div>
 
+  <!-- ===== МОДАЛ: ЗАЯВКА ИЗ КОНФИГУРАТОРА (аналог OrderModal door-cpq) ===== -->
+  <div class="modal-center" id="modal-cpqorder" aria-hidden="true">
+    <div class="modal-box" role="dialog" aria-modal="true" aria-labelledby="modalCpqOrderTitle" style="width:min(440px,100%);">
+      <div class="modal-box-head">
+        <h3 id="modalCpqOrderTitle">Оформление заявки</h3>
+        <button class="panel-close" onclick="closeForm('cpqorder')" aria-label="Закрыть"><svg class="icon" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg></button>
+      </div>
+      <div class="modal-box-body">
+        <p class="text-sm text-muted" id="cpqOrderSummary" style="margin-bottom:16px;">Гефест «Термо» · 960×2050 · левая · 42 000 ₽</p>
+        <div class="field"><label>Имя</label><input type="text" id="cpqOrderName" placeholder="Иван"></div>
+        <div class="field"><label>Телефон</label><input type="tel" id="cpqOrderPhone" placeholder="+7 900 000-00-00"></div>
+        <div class="gap-8" style="margin-top:18px;justify-content:end;">
+          <button class="btn" onclick="closeForm('cpqorder')">Отмена</button>
+          <button class="btn btn-accent" id="cpqOrderSubmit">Отправить заявку</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- ========================================================= -->
   <!-- 8. КОНФИГУРАТОР ДВЕРЕЙ -->
   <!-- ========================================================= -->
   <section class="view" id="view-store-configurator" data-cabinet-view="store" hidden>
     <div class="view-head">
-      <span class="view-tag">Согласуем: сборка комплекта двери менеджером прямо в сделке</span>
-      <h1 class="view-title">Конфигуратор дверей</h1>
-      <p class="view-sub">Выбор фабрики, модели и опций — справа итоговая стоимость по 4 ценам</p>
+      <span class="view-tag">Согласуем: структура и поток конфигуратора — по образцу реального движка door-cpq, в нашей дизайн-системе</span>
+      <h1 class="view-title">Конфигуратор · Входные двери</h1>
+      <p class="view-sub">Фабрика → модель → размер → опции → отделка — итог сразу по 4 ценам</p>
     </div>
 
-    <div class="grid" style="grid-template-columns:1.6fr 1fr; align-items:start;">
-      <div class="card card-pad">
-        <div class="field"><label>Фабрика</label>
-          <div class="choice-group">
-            <label class="choice checked"><input type="radio" name="cfg-factory" checked><span>Гефест</span></label>
-            <label class="choice"><input type="radio" name="cfg-factory"><span>Океан</span></label>
-            <label class="choice"><input type="radio" name="cfg-factory"><span>Перфекто</span></label>
-            <label class="choice"><input type="radio" name="cfg-factory"><span>Кайзер</span></label>
-            <label class="choice"><input type="radio" name="cfg-factory"><span>Форпост</span></label>
-          </div>
-        </div>
-        <div class="field"><label>Модель</label>
-          <div class="choice-group">
-            <label class="choice checked"><input type="radio" name="cfg-model" checked><span>Термо</span></label>
-            <label class="choice"><input type="radio" name="cfg-model"><span>Форт</span></label>
-            <label class="choice"><input type="radio" name="cfg-model"><span>Ультра</span></label>
-          </div>
-        </div>
-        <div class="field-grid">
-          <div class="field"><label>Размер проёма</label><select><option>860×2050</option><option selected>960×2050</option><option>1060×2050</option><option>Индивидуальный</option></select></div>
-          <div class="field"><label>Сторона открывания</label><select><option>Левая</option><option selected>Правая</option></select></div>
-          <div class="field"><label>Отделка полотна</label><select><option>Порошковая краска</option><option selected>Терморазрыв + МДФ</option><option>Шпон</option></select></div>
-          <div class="field"><label>Короб</label><select><option selected>Стандартный 100 мм</option><option>Расширенный 150 мм</option></select></div>
-          <div class="field"><label>Погонаж / наличники</label><select><option selected>Стандартные</option><option>Широкие</option><option>Без наличников</option></select></div>
-          <div class="field"><label>Петли</label><select><option>Врезные 2 шт</option><option selected>Врезные 3 шт</option><option>Скрытые</option></select></div>
-          <div class="field"><label>Замки</label><select><option>Цилиндровый</option><option selected>Сувальдный + цилиндровый</option><option>Электронный по отпечатку</option></select></div>
-          <div class="field"><label>Ручка</label><select><option selected>Скоба хром</option><option>Скоба чёрная</option><option>Комплект нажимной</option></select></div>
-        </div>
-        <div class="field"><label>Дополнительно</label>
-          <div class="choice-group">
-            <label class="choice checked"><input type="checkbox" checked><span>Шумоизоляция</span></label>
-            <label class="choice"><input type="checkbox"><span>Терморазрыв усиленный</span></label>
-            <label class="choice"><input type="checkbox"><span>Глазок</span></label>
-            <label class="choice"><input type="checkbox"><span>Антивандальное покрытие</span></label>
-          </div>
-        </div>
-      </div>
+    <!-- Категории/фабрики — аналог categoryTabs door-cpq -->
+    <div class="cpq-tabs" id="cpqFactoryTabs">
+      <button type="button" class="cpq-tab active" data-factory="gefest">Гефест</button>
+      <button type="button" class="cpq-tab" data-factory="okean">Океан</button>
+      <button type="button" class="cpq-tab" data-factory="perfekto">Перфекто</button>
+      <button type="button" class="cpq-tab" data-factory="kaiser">Кайзер</button>
+      <button type="button" class="cpq-tab" data-factory="forpost">Форпост</button>
+    </div>
 
-      <div class="card card-pad" style="position:sticky; top:0;">
-        <div class="card-head"><h3>Итог комплекта</h3></div>
-        <div class="list" style="margin-bottom:12px;">
-          <div class="list-item"><div class="list-main"><div class="list-title">Гефест «Термо» 960×2050</div><div class="list-sub">Правая, терморазрыв</div></div></div>
-          <div class="list-item"><div class="list-main"><div class="list-title">Короб + наличники</div><div class="list-sub">Стандартные</div></div></div>
-          <div class="list-item"><div class="list-main"><div class="list-title">Замок сувальдный + цилиндровый</div></div></div>
-          <div class="list-item"><div class="list-main"><div class="list-title">Ручка-скоба хром</div></div></div>
+    <div class="cpq-layout">
+      <!-- ЛЕВАЯ КОЛОНКА: превью (снаружи/внутри, сторона, характеристики) — как aside.preview door-cpq -->
+      <aside class="cpq-preview">
+        <div class="pill-toggle" id="cpqViewToggle">
+          <button type="button" class="active" data-view="exterior">Снаружи</button>
+          <button type="button" data-view="interior">Внутри</button>
         </div>
-        <div class="divider-h"></div>
-        <div class="price-row head"><span>—</span><span class="price-cell">РРЦ</span><span class="price-cell">Продажная</span><span class="price-cell">Клиенту</span><span class="price-cell">Закупка</span></div>
-        <div class="price-row">
-          <span class="price-cell name">Итого</span>
-          <span class="price-cell num cell-strong">48 000 ₽</span>
-          <span class="price-cell num cell-strong">45 000 ₽</span>
-          <span class="price-cell num cell-strong">42 000 ₽</span>
-          <span class="price-cell num cell-strong"><span class="tip lock"><svg class="icon icon-sm" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z"/></svg><span class="tip-bubble">Видят не все роли</span></span>27 400 ₽</span>
+        <div class="cpq-stage" id="cpqStage">
+          <svg viewBox="0 0 200 400" aria-label="Дверь" id="cpqDoorSvg">
+            <rect x="10" y="10" width="180" height="380" rx="4" fill="#2b2f33"/>
+            <rect id="cpqDoorFill" x="22" y="22" width="156" height="356" rx="2" fill="#8a97a8"/>
+            <rect x="38" y="40" width="124" height="150" rx="2" fill="none" stroke="#00000033" stroke-width="3"/>
+            <rect x="38" y="210" width="124" height="130" rx="2" fill="none" stroke="#00000033" stroke-width="3"/>
+            <circle id="cpqHandleDot" cx="160" cy="200" r="6" fill="#c9a86a"/>
+          </svg>
         </div>
-        <button class="btn btn-primary btn-block" style="margin-top:16px;" onclick="openDeal()">В сделку</button>
+        <div class="pill-toggle" id="cpqSideToggle">
+          <button type="button" class="active" data-side="left">Левая</button>
+          <button type="button" data-side="right">Правая</button>
+        </div>
+        <p class="cpq-meta" id="cpqMeta">Гефест «Термо» · 960×2050 · левая</p>
+        <div class="cpq-specs">
+          <b class="text-sm">Характеристики</b>
+          <dl>
+            <div><dt>Толщина полотна</dt><dd>75 мм</dd></div>
+            <div><dt>Класс взломостойкости</dt><dd>3 (умеренный)</dd></div>
+            <div><dt>Шумоизоляция</dt><dd id="cpqSpecNoise">32 дБ</dd></div>
+            <div><dt>Гарантия</dt><dd>5 лет</dd></div>
+          </dl>
+        </div>
+      </aside>
+
+      <!-- ПРАВАЯ КОЛОНКА: шаги — как main.steps door-cpq -->
+      <main class="cpq-steps">
+
+        <section class="cpq-step">
+          <div class="cpq-step-head"><h3>Выбор модели</h3></div>
+          <div class="cpq-swiper" id="cpqModelSwiper">
+            <button type="button" class="cpq-tile active" data-factory="gefest" data-model="Термо" data-price="48000" data-noise="42 дБ">
+              <span class="cpq-tile-check"><svg class="icon icon-sm" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg></span>
+              <span class="cpq-tile-thumb"><svg class="icon-lg" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 21h18M6 21V5.25A2.25 2.25 0 018.25 3h7.5A2.25 2.25 0 0118 5.25V21M9 9h.01M9 12h.01M9 15h.01"/></svg></span>
+              <span class="cpq-tile-name">Термо</span>
+              <span class="cpq-tile-price num">48 000 ₽</span>
+            </button>
+            <button type="button" class="cpq-tile" data-factory="gefest" data-model="Форт" data-price="35000" data-noise="34 дБ">
+              <span class="cpq-tile-check"><svg class="icon icon-sm" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg></span>
+              <span class="cpq-tile-thumb"><svg class="icon-lg" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 21h18M6 21V5.25A2.25 2.25 0 018.25 3h7.5A2.25 2.25 0 0118 5.25V21M9 9h.01M9 12h.01M9 15h.01"/></svg></span>
+              <span class="cpq-tile-name">Форт</span>
+              <span class="cpq-tile-price num">35 000 ₽</span>
+            </button>
+            <button type="button" class="cpq-tile" data-factory="gefest" data-model="Ультра" data-price="61500" data-noise="45 дБ">
+              <span class="cpq-tile-check"><svg class="icon icon-sm" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg></span>
+              <span class="cpq-tile-thumb"><svg class="icon-lg" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 21h18M6 21V5.25A2.25 2.25 0 018.25 3h7.5A2.25 2.25 0 0118 5.25V21M9 9h.01M9 12h.01M9 15h.01"/></svg></span>
+              <span class="cpq-tile-name">Ультра</span>
+              <span class="cpq-tile-price num">61 500 ₽</span>
+            </button>
+            <button type="button" class="cpq-tile disabled" data-factory="okean" data-model="Роялти" data-price="52000" data-noise="38 дБ" disabled>
+              <span class="cpq-tile-badge oos">нет в наличии</span>
+              <span class="cpq-tile-check"><svg class="icon icon-sm" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg></span>
+              <span class="cpq-tile-thumb"><svg class="icon-lg" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 21h18M6 21V5.25A2.25 2.25 0 018.25 3h7.5A2.25 2.25 0 0118 5.25V21M9 9h.01M9 12h.01M9 15h.01"/></svg></span>
+              <span class="cpq-tile-name">Роялти</span>
+              <span class="cpq-tile-price num">52 000 ₽</span>
+            </button>
+            <button type="button" class="cpq-tile" data-factory="okean" data-model="Форт" data-price="31500" data-noise="30 дБ">
+              <span class="cpq-tile-check"><svg class="icon icon-sm" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg></span>
+              <span class="cpq-tile-thumb"><svg class="icon-lg" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 21h18M6 21V5.25A2.25 2.25 0 018.25 3h7.5A2.25 2.25 0 0118 5.25V21M9 9h.01M9 12h.01M9 15h.01"/></svg></span>
+              <span class="cpq-tile-name">Форт</span>
+              <span class="cpq-tile-price num">31 500 ₽</span>
+            </button>
+            <button type="button" class="cpq-tile" data-factory="perfekto" data-model="Стайл" data-price="44000" data-noise="36 дБ">
+              <span class="cpq-tile-badge sale">акция</span>
+              <span class="cpq-tile-check"><svg class="icon icon-sm" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg></span>
+              <span class="cpq-tile-thumb"><svg class="icon-lg" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 21h18M6 21V5.25A2.25 2.25 0 018.25 3h7.5A2.25 2.25 0 0118 5.25V21M9 9h.01M9 12h.01M9 15h.01"/></svg></span>
+              <span class="cpq-tile-name">Стайл</span>
+              <span class="cpq-tile-price num"><s>48 000 ₽</s> 44 000 ₽</span>
+            </button>
+            <button type="button" class="cpq-tile" data-factory="kaiser" data-model="Гранд" data-price="58000" data-noise="40 дБ">
+              <span class="cpq-tile-check"><svg class="icon icon-sm" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg></span>
+              <span class="cpq-tile-thumb"><svg class="icon-lg" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 21h18M6 21V5.25A2.25 2.25 0 018.25 3h7.5A2.25 2.25 0 0118 5.25V21M9 9h.01M9 12h.01M9 15h.01"/></svg></span>
+              <span class="cpq-tile-name">Гранд</span>
+              <span class="cpq-tile-price num">58 000 ₽</span>
+            </button>
+            <button type="button" class="cpq-tile" data-factory="forpost" data-model="Классик" data-price="39500" data-noise="33 дБ">
+              <span class="cpq-tile-check"><svg class="icon icon-sm" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg></span>
+              <span class="cpq-tile-thumb"><svg class="icon-lg" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 21h18M6 21V5.25A2.25 2.25 0 018.25 3h7.5A2.25 2.25 0 0118 5.25V21M9 9h.01M9 12h.01M9 15h.01"/></svg></span>
+              <span class="cpq-tile-name">Классик</span>
+              <span class="cpq-tile-price num">39 500 ₽</span>
+            </button>
+          </div>
+        </section>
+
+        <section class="cpq-step">
+          <div class="cpq-step-head"><h3>Размер и сторона открывания</h3></div>
+          <div class="pill-toggle" id="cpqSizeModeToggle" style="margin-bottom:12px;">
+            <button type="button" class="active" data-mode="std">Стандартный</button>
+            <button type="button" data-mode="custom">Заказной размер</button>
+          </div>
+          <div class="field-grid">
+            <div class="field"><label>Ширина, мм</label>
+              <select id="cpqWidth">
+                <option value="860">860</option>
+                <option value="960" selected>960</option>
+                <option value="1060">1060</option>
+              </select>
+            </div>
+            <div class="field"><label>Высота, мм</label>
+              <select id="cpqHeight">
+                <option value="2000">2000</option>
+                <option value="2050" selected>2050</option>
+                <option value="2100">2100</option>
+              </select>
+            </div>
+          </div>
+          <p class="text-sm text-muted" id="cpqSizeHint" hidden>Наценка за заказной размер: ширина +6%, высота +4%</p>
+        </section>
+
+        <section class="cpq-step" data-block="korob">
+          <div class="cpq-step-head"><h3>Короб</h3><span class="badge badge-neutral">зависит от размера</span></div>
+          <div class="cpq-swiper">
+            <button type="button" class="cpq-tile active" data-price="0"><span class="cpq-tile-check"><svg class="icon icon-sm" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg></span><span class="cpq-tile-thumb"><svg class="icon-lg" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 21V7a2 2 0 012-2h12a2 2 0 012 2v14M4 21h16M4 21v-4h16v4"/></svg></span><span class="cpq-tile-name">Стандартный 100 мм</span><span class="cpq-tile-price num">включено</span></button>
+            <button type="button" class="cpq-tile" data-price="1200"><span class="cpq-tile-check"><svg class="icon icon-sm" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg></span><span class="cpq-tile-thumb"><svg class="icon-lg" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 21V7a2 2 0 012-2h12a2 2 0 012 2v14M4 21h16M4 21v-4h16v4"/></svg></span><span class="cpq-tile-name">Расширенный 150 мм</span><span class="cpq-tile-price num">+1 200 ₽</span></button>
+            <button type="button" class="cpq-tile" data-price="2400"><span class="cpq-tile-check"><svg class="icon icon-sm" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg></span><span class="cpq-tile-thumb"><svg class="icon-lg" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 21V7a2 2 0 012-2h12a2 2 0 012 2v14M4 21h16M4 21v-4h16v4"/></svg></span><span class="cpq-tile-name">Скрытый</span><span class="cpq-tile-price num">+2 400 ₽</span></button>
+          </div>
+        </section>
+
+        <section class="cpq-step" data-block="zamok">
+          <div class="cpq-step-head"><h3>Замок</h3></div>
+          <div class="cpq-swiper">
+            <button type="button" class="cpq-tile active" data-price="0"><span class="cpq-tile-check"><svg class="icon icon-sm" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg></span><span class="cpq-tile-thumb"><svg class="icon-lg" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z"/></svg></span><span class="cpq-tile-name">Цилиндровый</span><span class="cpq-tile-price num">включено</span></button>
+            <button type="button" class="cpq-tile" data-price="2600"><span class="cpq-tile-check"><svg class="icon icon-sm" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg></span><span class="cpq-tile-thumb"><svg class="icon-lg" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z"/></svg></span><span class="cpq-tile-name">Сувальдный + цилиндровый</span><span class="cpq-tile-price num">+2 600 ₽</span></button>
+            <button type="button" class="cpq-tile" data-price="8900"><span class="cpq-tile-check"><svg class="icon icon-sm" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg></span><span class="cpq-tile-thumb"><svg class="icon-lg" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z"/></svg></span><span class="cpq-tile-name">Электронный по отпечатку</span><span class="cpq-tile-price num">+8 900 ₽</span></button>
+          </div>
+        </section>
+
+        <section class="cpq-step" data-block="ruchka">
+          <div class="cpq-step-head"><h3>Ручка</h3></div>
+          <div class="cpq-swiper">
+            <button type="button" class="cpq-tile active" data-price="0" data-hex="#c9ccd1"><span class="cpq-tile-check"><svg class="icon icon-sm" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg></span><span class="cpq-tile-thumb" style="background:#c9ccd1"></span><span class="cpq-tile-name">Скоба хром</span><span class="cpq-tile-price num">включено</span></button>
+            <button type="button" class="cpq-tile" data-price="300" data-hex="#23262b"><span class="cpq-tile-check"><svg class="icon icon-sm" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg></span><span class="cpq-tile-thumb" style="background:#23262b"></span><span class="cpq-tile-name">Скоба чёрная</span><span class="cpq-tile-price num">+300 ₽</span></button>
+            <button type="button" class="cpq-tile" data-price="1500" data-hex="#b8985a"><span class="cpq-tile-check"><svg class="icon icon-sm" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg></span><span class="cpq-tile-thumb" style="background:#b8985a"></span><span class="cpq-tile-name">Комплект нажимной, золото</span><span class="cpq-tile-price num">+1 500 ₽</span></button>
+          </div>
+        </section>
+
+        <section class="cpq-step" data-block="petli">
+          <div class="cpq-step-head"><h3>Петли</h3></div>
+          <div class="cpq-swiper">
+            <button type="button" class="cpq-tile" data-price="0"><span class="cpq-tile-check"><svg class="icon icon-sm" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg></span><span class="cpq-tile-thumb"><svg class="icon-lg" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 10.5V6.75a4.5 4.5 0 119 0v3.75M3.75 10.5h16.5v9a1.5 1.5 0 01-1.5 1.5H5.25a1.5 1.5 0 01-1.5-1.5v-9z"/></svg></span><span class="cpq-tile-name">Врезные 2 шт</span><span class="cpq-tile-price num">включено</span></button>
+            <button type="button" class="cpq-tile active" data-price="400"><span class="cpq-tile-check"><svg class="icon icon-sm" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg></span><span class="cpq-tile-thumb"><svg class="icon-lg" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 10.5V6.75a4.5 4.5 0 119 0v3.75M3.75 10.5h16.5v9a1.5 1.5 0 01-1.5 1.5H5.25a1.5 1.5 0 01-1.5-1.5v-9z"/></svg></span><span class="cpq-tile-name">Врезные 3 шт</span><span class="cpq-tile-price num">+400 ₽</span></button>
+            <button type="button" class="cpq-tile" data-price="1800"><span class="cpq-tile-check"><svg class="icon icon-sm" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg></span><span class="cpq-tile-thumb"><svg class="icon-lg" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 10.5V6.75a4.5 4.5 0 119 0v3.75M3.75 10.5h16.5v9a1.5 1.5 0 01-1.5 1.5H5.25a1.5 1.5 0 01-1.5-1.5v-9z"/></svg></span><span class="cpq-tile-name">Скрытые</span><span class="cpq-tile-price num">+1 800 ₽</span></button>
+          </div>
+        </section>
+
+        <section class="cpq-step" data-block="dop" data-multiselect="1">
+          <div class="cpq-step-head"><h3>Дополнительно</h3></div>
+          <div class="cpq-swiper">
+            <button type="button" class="cpq-tile active" data-price="900"><span class="cpq-tile-check"><svg class="icon icon-sm" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg></span><span class="cpq-tile-thumb"><svg class="icon-lg" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19.114 5.636a9 9 0 010 12.728M16.463 8.288a5.25 5.25 0 010 7.424M6.75 8.25l4.72-4.72a.75.75 0 011.28.53v15.88a.75.75 0 01-1.28.53l-4.72-4.72H4.51c-.88 0-1.704-.507-1.938-1.354A9.01 9.01 0 012.25 12c0-.83.112-1.633.322-2.396C2.806 8.756 3.63 8.25 4.51 8.25H6.75z"/></svg></span><span class="cpq-tile-name">Шумоизоляция</span><span class="cpq-tile-price num">+900 ₽</span></button>
+            <button type="button" class="cpq-tile" data-price="1500"><span class="cpq-tile-check"><svg class="icon icon-sm" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg></span><span class="cpq-tile-thumb"><svg class="icon-lg" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 3.75H6.912a2.25 2.25 0 00-2.15 1.588L2.35 13.177a2.25 2.25 0 00-.1.661V18a2.25 2.25 0 002.25 2.25h15a2.25 2.25 0 002.25-2.25v-4.162c0-.224-.034-.447-.1-.661L19.24 5.338a2.25 2.25 0 00-2.15-1.588H15M9 3.75v11.25m0-11.25h6m-6 11.25h6"/></svg></span><span class="cpq-tile-name">Терморазрыв усиленный</span><span class="cpq-tile-price num">+1 500 ₽</span></button>
+            <button type="button" class="cpq-tile" data-price="350"><span class="cpq-tile-check"><svg class="icon icon-sm" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg></span><span class="cpq-tile-thumb"><svg class="icon-lg" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z"/></svg></span><span class="cpq-tile-name">Глазок</span><span class="cpq-tile-price num">+350 ₽</span></button>
+            <button type="button" class="cpq-tile" data-price="2200"><span class="cpq-tile-check"><svg class="icon icon-sm" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z"/></svg></span><span class="cpq-tile-name">Антивандальное покрытие</span><span class="cpq-tile-price num">+2 200 ₽</span></button>
+          </div>
+        </section>
+
+        <section class="cpq-step">
+          <div class="cpq-step-head"><h3>Отделка полотна</h3></div>
+          <div class="cpq-finish-grid">
+            <div class="cpq-finish-col">
+              <label>Снаружи</label>
+              <select id="cpqFinishExt">
+                <option value="0">Порошковая краска</option>
+                <option value="2400" selected>МДФ-панели, терморазрыв</option>
+                <option value="5200">Шпон натуральный</option>
+              </select>
+              <div class="cpq-tile-colors">
+                <button type="button" class="cpq-color-dot active" style="background:#8a97a8" title="Серый графит" data-hex="#8a97a8"></button>
+                <button type="button" class="cpq-color-dot" style="background:#3d3f42" title="Чёрный муар" data-hex="#3d3f42"></button>
+                <button type="button" class="cpq-color-dot" style="background:#7a4a33" title="Тёмный дуб" data-hex="#7a4a33"></button>
+              </div>
+            </div>
+            <div class="cpq-finish-col">
+              <label>Внутри</label>
+              <select id="cpqFinishInt">
+                <option value="0" selected>Порошковая краска</option>
+                <option value="2400">МДФ-панели</option>
+                <option value="5200">Шпон натуральный</option>
+              </select>
+              <div class="cpq-tile-colors">
+                <button type="button" class="cpq-color-dot active" style="background:#e7e4de" title="Слоновая кость" data-hex="#e7e4de"></button>
+                <button type="button" class="cpq-color-dot" style="background:#c9ccd1" title="Светло-серый" data-hex="#c9ccd1"></button>
+                <button type="button" class="cpq-color-dot" style="background:#a9805a" title="Медовый дуб" data-hex="#a9805a"></button>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="cpq-step">
+          <div class="cpq-step-head"><h3>Регион</h3></div>
+          <select id="cpqRegion" style="max-width:320px;">
+            <option>Ростов-на-Дону</option>
+            <option>Ростовская область</option>
+            <option>Краснодар</option>
+          </select>
+        </section>
+
+      </main>
+    </div>
+
+    <!-- Sticky-бар итога — аналог footer.totalBar door-cpq -->
+    <div class="cpq-totalbar">
+      <div class="cpq-total-info">
+        <div class="cpq-total-price num" id="cpqTotalPrice">42 000 ₽</div>
+        <button type="button" class="cpq-total-link" id="cpqBreakdownToggle">Показать разбивку</button>
+      </div>
+      <div class="cpq-total-actions">
+        <button type="button" class="cpq-btn-ghost-inv" id="cpqAddToCart">+ В заказ</button>
+        <button type="button" class="btn btn-accent" id="cpqCheckout">Оформить заказ</button>
+      </div>
+    </div>
+
+    <!-- Корзина-комплект — аналог cartPanel door-cpq -->
+    <div class="cpq-cart" id="cpqCart" hidden>
+      <div class="cpq-cart-head">
+        <span id="cpqCartTitle">Заказ-комплект: 0 дв.</span>
+        <span class="num" id="cpqCartTotal" style="margin-left:auto;">0 ₽</span>
+        <button type="button" class="btn btn-sm btn-ghost" id="cpqCartClear">очистить</button>
+      </div>
+      <div id="cpqCartRows"></div>
+    </div>
+
+    <!-- Разбивка цены + 4 цены (наш дифференциатор) — аналог breakdown door-cpq -->
+    <div class="cpq-breakdown" id="cpqBreakdown" hidden>
+      <div id="cpqBreakdownRows"></div>
+      <div class="divider-h"></div>
+      <div class="price-row head"><span>—</span><span class="price-cell">База РРЦ</span><span class="price-cell">Продажная</span><span class="price-cell">Клиенту</span><span class="price-cell">Закупочная</span></div>
+      <div class="price-row">
+        <span class="price-cell name">Итого комплект</span>
+        <span class="price-cell num cell-strong" id="cpqPriceRrc">48 000 ₽</span>
+        <span class="price-cell num cell-strong" id="cpqPriceSell">45 000 ₽</span>
+        <span class="price-cell num cell-strong" id="cpqPriceClient">42 000 ₽</span>
+        <span class="price-cell num cell-strong" id="cpqPricePurchase"><span class="tip lock"><svg class="icon icon-sm" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z"/></svg><span class="tip-bubble">Видят не все роли</span></span>27 400 ₽</span>
       </div>
     </div>
   </section>
@@ -2755,7 +3049,7 @@ th.sortable:hover{color:var(--fg);}
   if(dealOverlay) dealOverlay.addEventListener('click', function(e){ if(e.target === dealOverlay) closeDeal(); });
 
   /* ===== БЛАНКИ: МОДАЛЬНЫЕ ФОРМЫ ===== */
-  var FORM_TYPES = ['call','vh','mk'];
+  var FORM_TYPES = ['call','vh','mk','cpqorder'];
   window.openForm = function(type){
     var m = document.getElementById('modal-' + type);
     if(m) m.classList.add('open');
@@ -2864,6 +3158,288 @@ th.sortable:hover{color:var(--fg);}
   if(notifBtn) notifBtn.addEventListener('click', function(){ showToast('Новых уведомлений нет'); });
   var userChip = document.querySelector('.user-chip');
   if(userChip) userChip.addEventListener('click', function(){ showToast('Профиль менеджера — вне прототипа'); });
+
+  /* ===== КОНФИГУРАТОР (поток/структура door-cpq: модель → размер → опции → отделка → 4 цены) ===== */
+  (function cpqInit(){
+    var root2 = document.getElementById('view-store-configurator');
+    if(!root2) return;
+
+    var state = {
+      factory: 'gefest',
+      model: 'Термо',
+      modelPrice: 48000,
+      widthMm: 960,
+      heightMm: 2050,
+      side: 'left',
+      view: 'exterior',
+      customSize: false,
+      finishExt: 2400,
+      finishInt: 0,
+      cart: []
+    };
+
+    function num(n){ return Math.round(n).toLocaleString('ru-RU') + ' ₽'; }
+
+    // Сумма выбранных плиток внутри каждого шага-блока (data-block), кроме модели/короба и т.п.
+    function blocksTotal(){
+      var sum = 0;
+      root2.querySelectorAll('.cpq-step[data-block]').forEach(function(step){
+        step.querySelectorAll('.cpq-tile.active').forEach(function(t){
+          sum += Number(t.dataset.price || 0);
+        });
+      });
+      return sum;
+    }
+
+    function sizeMarkup(rrc){
+      if(!state.customSize) return 0;
+      return Math.round(rrc * 0.10); // условная наценка за заказной размер (демо)
+    }
+
+    function recalc(){
+      var extSel = document.getElementById('cpqFinishExt');
+      var intSel = document.getElementById('cpqFinishInt');
+      state.finishExt = extSel ? Number(extSel.value) : 0;
+      state.finishInt = intSel ? Number(intSel.value) : 0;
+
+      var rrc = state.modelPrice + blocksTotal() + state.finishExt + state.finishInt;
+      rrc += sizeMarkup(rrc);
+
+      var sell = Math.round(rrc * 0.94);
+      var client = Math.max(0, sell - 3000);
+      var purchase = Math.round(rrc * 0.57);
+
+      var totalEl = document.getElementById('cpqTotalPrice');
+      if(totalEl) totalEl.textContent = num(client);
+      var rrcEl = document.getElementById('cpqPriceRrc'); if(rrcEl) rrcEl.textContent = num(rrc);
+      var sellEl = document.getElementById('cpqPriceSell'); if(sellEl) sellEl.textContent = num(sell);
+      var clientEl = document.getElementById('cpqPriceClient'); if(clientEl) clientEl.textContent = num(client);
+      var purchaseEl = document.getElementById('cpqPricePurchase');
+      if(purchaseEl){
+        var lockSpan = purchaseEl.querySelector('.tip');
+        purchaseEl.innerHTML = '';
+        if(lockSpan) purchaseEl.appendChild(lockSpan);
+        purchaseEl.appendChild(document.createTextNode(num(purchase)));
+      }
+
+      renderBreakdown(rrc);
+      updateMeta();
+      return { rrc: rrc, sell: sell, client: client, purchase: purchase };
+    }
+
+    function renderBreakdown(rrc){
+      var wrap = document.getElementById('cpqBreakdownRows');
+      if(!wrap) return;
+      var rows = [];
+      rows.push({ label: 'Модель «' + state.model + '», ' + state.widthMm + '×' + state.heightMm, price: state.modelPrice });
+      root2.querySelectorAll('.cpq-step[data-block]').forEach(function(step){
+        step.querySelectorAll('.cpq-tile.active').forEach(function(t){
+          var p = Number(t.dataset.price || 0);
+          if(p > 0){
+            var nameEl = t.querySelector('.cpq-tile-name');
+            rows.push({ label: nameEl ? nameEl.textContent : 'Опция', price: p });
+          }
+        });
+      });
+      if(state.finishExt > 0) rows.push({ label: 'Отделка снаружи', price: state.finishExt });
+      if(state.finishInt > 0) rows.push({ label: 'Отделка внутри', price: state.finishInt });
+      if(state.customSize) rows.push({ label: 'Наценка за заказной размер', price: sizeMarkup(rrc - sizeMarkup(rrc)) });
+      wrap.innerHTML = rows.map(function(r){
+        return '<div class="cpq-breakdown-row"><span>' + r.label + '</span><b class="num">' + (r.price ? '+' + num(r.price) : 'включено') + '</b></div>';
+      }).join('');
+    }
+
+    function updateMeta(){
+      var meta = document.getElementById('cpqMeta');
+      if(meta) meta.textContent = 'Гефест «' + state.model + '» · ' + state.widthMm + '×' + state.heightMm + ' · ' + (state.side === 'left' ? 'левая' : 'правая');
+      var fill = document.getElementById('cpqDoorFill');
+      if(fill){
+        var ruchka = root2.querySelector('.cpq-step[data-block="ruchka"] .cpq-tile.active');
+        // цвет полотна берём от внешней отделки-свотча, если выбран
+        var extDot = root2.querySelector('#view-store-configurator .cpq-finish-col:first-child .cpq-color-dot.active');
+        if(extDot) fill.setAttribute('fill', extDot.dataset.hex || '#8a97a8');
+        var handleDot = document.getElementById('cpqHandleDot');
+        if(handleDot && ruchka && ruchka.dataset.hex) handleDot.setAttribute('fill', ruchka.dataset.hex);
+      }
+      var stage = document.getElementById('cpqStage');
+      if(stage) stage.style.opacity = state.view === 'interior' ? '.72' : '1';
+      var noiseEl = document.getElementById('cpqSpecNoise');
+      var activeModelTile = root2.querySelector('#cpqModelSwiper .cpq-tile.active');
+      if(noiseEl && activeModelTile && activeModelTile.dataset.noise) noiseEl.textContent = activeModelTile.dataset.noise;
+    }
+
+    function selectSingle(tile){
+      var step = tile.closest('.cpq-step');
+      if(!step) return;
+      if(step.dataset.multiselect === '1'){
+        tile.classList.toggle('active');
+      } else {
+        step.querySelectorAll('.cpq-tile').forEach(function(t){ t.classList.remove('active'); });
+        tile.classList.add('active');
+      }
+    }
+
+    // Фабрика: фильтр модельных плиток
+    document.querySelectorAll('#cpqFactoryTabs .cpq-tab').forEach(function(tab){
+      tab.addEventListener('click', function(){
+        document.querySelectorAll('#cpqFactoryTabs .cpq-tab').forEach(function(b){ b.classList.remove('active'); });
+        tab.classList.add('active');
+        state.factory = tab.dataset.factory;
+        var firstVisible = null;
+        root2.querySelectorAll('#cpqModelSwiper .cpq-tile').forEach(function(t){
+          var match = t.dataset.factory === state.factory;
+          t.style.display = match ? '' : 'none';
+          if(match && !firstVisible && !t.disabled) firstVisible = t;
+        });
+        if(firstVisible){
+          root2.querySelectorAll('#cpqModelSwiper .cpq-tile').forEach(function(t){ t.classList.remove('active'); });
+          firstVisible.classList.add('active');
+          state.model = firstVisible.dataset.model;
+          state.modelPrice = Number(firstVisible.dataset.price || 0);
+        }
+        recalc();
+      });
+    });
+
+    // Выбор модели
+    root2.querySelectorAll('#cpqModelSwiper .cpq-tile').forEach(function(tile){
+      tile.addEventListener('click', function(){
+        if(tile.disabled) return;
+        root2.querySelectorAll('#cpqModelSwiper .cpq-tile').forEach(function(t){ t.classList.remove('active'); });
+        tile.classList.add('active');
+        state.model = tile.dataset.model;
+        state.modelPrice = Number(tile.dataset.price || 0);
+        recalc();
+      });
+    });
+
+    // Опции блоков (короб/замок/ручка/петли/доп.)
+    root2.querySelectorAll('.cpq-step[data-block] .cpq-tile').forEach(function(tile){
+      tile.addEventListener('click', function(){
+        selectSingle(tile);
+        recalc();
+      });
+    });
+
+    // Цветовые свотчи отделки
+    root2.querySelectorAll('.cpq-color-dot').forEach(function(dot){
+      dot.addEventListener('click', function(){
+        var group = dot.closest('.cpq-finish-col');
+        if(group) group.querySelectorAll('.cpq-color-dot').forEach(function(d){ d.classList.remove('active'); });
+        dot.classList.add('active');
+        updateMeta();
+      });
+    });
+
+    // Тип отделки (select) — влияет на цену
+    ['cpqFinishExt','cpqFinishInt'].forEach(function(id){
+      var el = document.getElementById(id);
+      if(el) el.addEventListener('change', recalc);
+    });
+
+    // Вид (снаружи/внутри)
+    var viewToggle = document.getElementById('cpqViewToggle');
+    if(viewToggle) viewToggle.querySelectorAll('button').forEach(function(b){
+      b.addEventListener('click', function(){ state.view = b.dataset.view; updateMeta(); });
+    });
+    // Сторона
+    var sideToggle = document.getElementById('cpqSideToggle');
+    if(sideToggle) sideToggle.querySelectorAll('button').forEach(function(b){
+      b.addEventListener('click', function(){
+        state.side = b.dataset.side;
+        var stageBox = document.getElementById('cpqStage');
+        if(stageBox) stageBox.style.transform = state.side === 'right' ? 'scaleX(-1)' : 'none';
+        updateMeta();
+      });
+    });
+    // Стандартный / заказной размер
+    var sizeModeToggle = document.getElementById('cpqSizeModeToggle');
+    var widthSel = document.getElementById('cpqWidth');
+    var heightSel = document.getElementById('cpqHeight');
+    var sizeHint = document.getElementById('cpqSizeHint');
+    if(sizeModeToggle) sizeModeToggle.querySelectorAll('button').forEach(function(b){
+      b.addEventListener('click', function(){
+        state.customSize = b.dataset.mode === 'custom';
+        if(sizeHint) sizeHint.hidden = !state.customSize;
+        recalc();
+      });
+    });
+    if(widthSel) widthSel.addEventListener('change', function(){ state.widthMm = Number(widthSel.value); recalc(); });
+    if(heightSel) heightSel.addEventListener('change', function(){ state.heightMm = Number(heightSel.value); recalc(); });
+
+    // Разбивка вкл/выкл
+    var breakdownToggle = document.getElementById('cpqBreakdownToggle');
+    var breakdownPanel = document.getElementById('cpqBreakdown');
+    if(breakdownToggle && breakdownPanel){
+      breakdownToggle.addEventListener('click', function(){
+        breakdownPanel.hidden = !breakdownPanel.hidden;
+        breakdownToggle.textContent = breakdownPanel.hidden ? 'Показать разбивку' : 'Скрыть разбивку';
+      });
+    }
+
+    // Корзина-комплект
+    function renderCart(){
+      var panel = document.getElementById('cpqCart');
+      var rows = document.getElementById('cpqCartRows');
+      var title = document.getElementById('cpqCartTitle');
+      var totalEl = document.getElementById('cpqCartTotal');
+      if(!panel) return;
+      panel.hidden = state.cart.length === 0;
+      if(!rows || !title || !totalEl) return;
+      title.textContent = 'Заказ-комплект: ' + state.cart.reduce(function(s,c){ return s + c.qty; }, 0) + ' дв.';
+      totalEl.textContent = num(state.cart.reduce(function(s,c){ return s + c.total * c.qty; }, 0));
+      rows.innerHTML = state.cart.map(function(c, i){
+        return '<div class="cpq-cart-row">' +
+          '<span style="flex:1;">' + c.label + '</span>' +
+          '<span class="cpq-qty">' +
+            '<button type="button" data-cart-dec="' + i + '">−</button>' +
+            '<span class="num">' + c.qty + '</span>' +
+            '<button type="button" data-cart-inc="' + i + '">+</button>' +
+          '</span>' +
+          '<span class="num" style="min-width:80px;text-align:right;">' + num(c.total * c.qty) + '</span>' +
+          '<button type="button" class="btn btn-sm btn-ghost" data-cart-remove="' + i + '">✕</button>' +
+        '</div>';
+      }).join('');
+    }
+    var addToCartBtn = document.getElementById('cpqAddToCart');
+    if(addToCartBtn) addToCartBtn.addEventListener('click', function(){
+      var p = recalc();
+      state.cart.push({
+        label: 'Гефест «' + state.model + '» ' + state.widthMm + '×' + state.heightMm,
+        total: p.client,
+        qty: 1
+      });
+      renderCart();
+      showToast('Добавлено в заказ-комплект');
+    });
+    var cartClearBtn = document.getElementById('cpqCartClear');
+    if(cartClearBtn) cartClearBtn.addEventListener('click', function(){ state.cart = []; renderCart(); });
+    root2.addEventListener('click', function(e){
+      var dec = e.target.closest('[data-cart-dec]');
+      var inc = e.target.closest('[data-cart-inc]');
+      var rem = e.target.closest('[data-cart-remove]');
+      if(dec){ var i1 = Number(dec.dataset.cartDec); state.cart[i1].qty = Math.max(1, state.cart[i1].qty - 1); renderCart(); }
+      if(inc){ var i2 = Number(inc.dataset.cartInc); state.cart[i2].qty = Math.min(50, state.cart[i2].qty + 1); renderCart(); }
+      if(rem){ var i3 = Number(rem.dataset.cartRemove); state.cart.splice(i3, 1); renderCart(); }
+    });
+
+    // Оформить заказ → модал имя/телефон → тост + карточка сделки
+    var checkoutBtn = document.getElementById('cpqCheckout');
+    if(checkoutBtn) checkoutBtn.addEventListener('click', function(){
+      var p = recalc();
+      var summary = document.getElementById('cpqOrderSummary');
+      if(summary) summary.textContent = 'Гефест «' + state.model + '» · ' + state.widthMm + '×' + state.heightMm + ' · ' + (state.side === 'left' ? 'левая' : 'правая') + ' · ' + num(p.client);
+      window.openForm('cpqorder');
+    });
+    var cpqOrderSubmit = document.getElementById('cpqOrderSubmit');
+    if(cpqOrderSubmit) cpqOrderSubmit.addEventListener('click', function(){
+      window.closeForm('cpqorder');
+      showToast('Заявка принята — черновик сделки создан, менеджер свяжется с клиентом');
+      window.openDeal();
+    });
+
+    recalc();
+  })();
 
   /* ===== SKELETON → ЗАГРУЖЕНО (Отчёты, сравнение магазинов) ===== */
   window.addEventListener('load', function(){
