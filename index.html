@@ -223,6 +223,34 @@ th.sortable:hover{color:var(--fg);}
 .kpi-delta.up{color:var(--success);}
 .kpi-delta.down{color:var(--danger);}
 
+/* ===== СВОДКА (компактные KPI-чипы внутри CRM) ===== */
+.summary-strip{display:flex; flex-wrap:wrap; gap:12px; margin-bottom:18px;}
+.summary-chip{
+  flex:1 1 180px; display:flex; align-items:center; gap:12px; padding:14px 16px; background:var(--surface);
+  border:1px solid var(--border); border-radius:var(--radius-md); box-shadow:var(--shadow-sm);
+}
+.summary-chip .kpi-icon{width:34px; height:34px;}
+.summary-chip .sc-value{font-size:18px; font-weight:700; line-height:1.2;}
+.summary-chip .sc-label{font-size:11.5px; color:var(--secondary);}
+
+/* ===== ОГЛАВЛЕНИЕ: ПЛИТКИ МОДУЛЕЙ ===== */
+.tile-grid{display:grid; grid-template-columns:repeat(3,1fr); gap:16px;}
+@media (max-width:1024px){.tile-grid{grid-template-columns:repeat(2,1fr);}}
+@media (max-width:768px){.tile-grid{grid-template-columns:1fr;}}
+.tile{
+  display:flex; flex-direction:column; gap:12px; padding:22px; min-height:150px; text-align:left;
+  background:var(--surface); border:1px solid var(--border); border-radius:var(--radius-lg); box-shadow:var(--shadow-sm);
+  cursor:pointer; text-decoration:none; color:var(--fg);
+  transition:box-shadow 200ms ease-out, transform 200ms ease-out, border-color 200ms ease-out;
+}
+.tile:hover{box-shadow:var(--shadow-lg); transform:translateY(-2px); border-color:var(--accent);}
+.tile:active{transform:translateY(0);}
+.tile-icon{width:48px; height:48px; border-radius:12px; background:var(--accent-soft); color:var(--accent); display:flex; align-items:center; justify-content:center; flex-shrink:0;}
+.tile-icon svg{width:26px; height:26px;}
+.tile h3{font-size:16px;}
+.tile p{color:var(--secondary); font-size:12.5px; line-height:1.5;}
+.tile-cta{margin-top:auto; display:inline-flex; align-items:center; gap:5px; font-size:12.5px; font-weight:700; color:var(--accent);}
+
 /* ===== MINI FUNNEL ===== */
 .mini-funnel{display:flex; flex-direction:column; gap:10px;}
 .mf-row{display:flex; align-items:center; gap:12px;}
@@ -446,8 +474,8 @@ th.sortable:hover{color:var(--fg);}
     <nav class="nav" data-nav="store">
       <div class="nav-section-label">Продажи</div>
       <div class="nav-item" data-route="store-dashboard">
-        <svg class="icon" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 12l8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75"/></svg>
-        <span class="label">Дашборд</span>
+        <svg class="icon" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6A2.25 2.25 0 016 3.75h2.25A2.25 2.25 0 0110.5 6v2.25a2.25 2.25 0 01-2.25 2.25H6a2.25 2.25 0 01-2.25-2.25V6zM3.75 15.75A2.25 2.25 0 016 13.5h2.25a2.25 2.25 0 012.25 2.25V18a2.25 2.25 0 01-2.25 2.25H6A2.25 2.25 0 013.75 18v-2.25zM13.5 6a2.25 2.25 0 012.25-2.25H18A2.25 2.25 0 0120.25 6v2.25A2.25 2.25 0 0118 10.5h-2.25a2.25 2.25 0 01-2.25-2.25V6zM13.5 15.75a2.25 2.25 0 012.25-2.25H18a2.25 2.25 0 012.25 2.25V18A2.25 2.25 0 0118 20.25h-2.25A2.25 2.25 0 0113.5 18v-2.25z"/></svg>
+        <span class="label">Оглавление</span>
       </div>
       <div class="nav-item" data-route="store-leads">
         <svg class="icon" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M15 19.128zM8.625 10.5a3.375 3.375 0 100-6.75 3.375 3.375 0 000 6.75zm7.5-3a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
@@ -598,104 +626,54 @@ th.sortable:hover{color:var(--fg);}
   <!-- ========================================================= -->
   <section class="view" id="view-store-dashboard" data-cabinet-view="store">
     <div class="view-head">
-      <span class="view-tag">Согласуем: общий обзор дня для менеджера и владельца</span>
-      <h1 class="view-title">Дашборд</h1>
-      <p class="view-sub">Магазин «Стачки, 245» · сегодня, 21 сентября</p>
+      <span class="view-tag">Согласуем: стартовый экран — быстрый вход во все модули продукта</span>
+      <h1 class="view-title">Оглавление</h1>
+      <p class="view-sub">Магазин «Стачки, 245» · выберите раздел</p>
     </div>
 
-    <div class="grid grid-4" style="margin-bottom:20px;">
-      <div class="card kpi-card">
-        <div class="kpi-top">
-          <div class="kpi-icon"><svg class="icon" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M8.625 10.5a3.375 3.375 0 100-6.75 3.375 3.375 0 000 6.75z"/></svg></div>
-          <span class="kpi-delta up"><svg class="icon icon-sm" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 10.5L12 3m0 0l7.5 7.5M12 3v18"/></svg>+12%</span>
-        </div>
-        <div class="kpi-value num">27</div>
-        <div class="kpi-label">Лиды сегодня</div>
-      </div>
-      <div class="card kpi-card">
-        <div class="kpi-top">
-          <div class="kpi-icon"><svg class="icon" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M20.25 14.15v4.25c0 1.094-.787 2.036-1.872 2.18-2.087.277-4.216.42-6.378.42s-4.291-.143-6.378-.42c-1.085-.144-1.872-1.086-1.872-2.18v-4.25"/></svg></div>
-          <span class="kpi-delta up num">+5</span>
-        </div>
-        <div class="kpi-value num">143</div>
-        <div class="kpi-label">Сделки в работе</div>
-      </div>
-      <div class="card kpi-card">
-        <div class="kpi-top">
-          <div class="kpi-icon"><svg class="icon" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 8.25h19.5M2.25 9h19.5m-16.5 5.25h6"/></svg></div>
-          <span class="kpi-delta up">+8%</span>
-        </div>
-        <div class="kpi-value num">4,2 млн ₽</div>
-        <div class="kpi-label">Выручка за месяц</div>
-      </div>
-      <div class="card kpi-card">
-        <div class="kpi-top">
-          <div class="kpi-icon"><svg class="icon" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 3c2.755 0 5.455.232 8.083.678M12 3v18"/></svg></div>
-          <span class="kpi-delta down">-2%</span>
-        </div>
-        <div class="kpi-value num">34%</div>
-        <div class="kpi-label">Конверсия в продажу</div>
-      </div>
-    </div>
-
-    <div class="grid grid-2" style="align-items:start;">
-      <div class="card card-pad">
-        <div class="card-head"><h3>Мини-воронка «Розница»</h3><a href="#/store/funnel" class="text-sm">Открыть воронку →</a></div>
-        <div class="mini-funnel">
-          <div class="mf-row"><div class="mf-label">Встреча</div><div class="mf-bar-track"><div class="mf-bar-fill" style="width:100%"></div></div><div class="mf-value num">210</div></div>
-          <div class="mf-row"><div class="mf-label">Замер</div><div class="mf-bar-track"><div class="mf-bar-fill" style="width:80%"></div></div><div class="mf-value num">168</div></div>
-          <div class="mf-row"><div class="mf-label">Оплата</div><div class="mf-bar-track"><div class="mf-bar-fill" style="width:58%"></div></div><div class="mf-value num">122</div></div>
-          <div class="mf-row"><div class="mf-label">Установка</div><div class="mf-bar-track"><div class="mf-bar-fill" style="width:46%"></div></div><div class="mf-value num">96</div></div>
-          <div class="mf-row"><div class="mf-label">Выполнено</div><div class="mf-bar-track"><div class="mf-bar-fill" style="width:38%"></div></div><div class="mf-value num">81</div></div>
-        </div>
-      </div>
-
-      <div class="card card-pad">
-        <div class="card-head"><h3>Задачи на сегодня</h3><span class="badge badge-warning">6 активных</span></div>
-        <div class="list">
-          <div class="list-item">
-            <div class="list-check checked" role="checkbox" aria-checked="true" tabindex="0" aria-label="Отметить выполненной"><svg viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg></div>
-            <div class="list-main"><div class="list-title" style="text-decoration:line-through;color:var(--secondary)">Позвонить Синицыну — уточнить замер</div><div class="list-sub">Выполнено в 09:14</div></div>
-          </div>
-          <div class="list-item">
-            <div class="list-check" role="checkbox" aria-checked="false" tabindex="0" aria-label="Отметить выполненной"></div>
-            <div class="list-main"><div class="list-title">Позвонить по замеру — Крылов Д.</div><div class="list-sub">Сделка №4128 · до 18:00 сегодня</div></div>
-            <span class="badge badge-danger">Срочно</span>
-          </div>
-          <div class="list-item">
-            <div class="list-check" role="checkbox" aria-checked="false" tabindex="0" aria-label="Отметить выполненной"></div>
-            <div class="list-main"><div class="list-title">Отправить КП по МК — Ефимова Н.</div><div class="list-sub">Сделка №4131 · сегодня, 16:00</div></div>
-          </div>
-          <div class="list-item">
-            <div class="list-check" role="checkbox" aria-checked="false" tabindex="0" aria-label="Отметить выполненной"></div>
-            <div class="list-main"><div class="list-title">Подтвердить доставку — ООО «СтройГрад»</div><div class="list-sub">Сделка №4098 · завтра, 10:00</div></div>
-          </div>
-          <div class="list-item">
-            <div class="list-check" role="checkbox" aria-checked="false" tabindex="0" aria-label="Отметить выполненной"></div>
-            <div class="list-main"><div class="list-title">Запросить отзыв — Гуляев С.</div><div class="list-sub">Сделка №4076 · установка завершена</div></div>
-          </div>
-          <div class="list-item">
-            <div class="list-check" role="checkbox" aria-checked="false" tabindex="0" aria-label="Отметить выполненной"></div>
-            <div class="list-main"><div class="list-title">Согласовать скидку — Тарасов И.</div><div class="list-sub">Сделка №4140 · ждёт решения РОП</div></div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <div class="card card-pad" style="margin-top:20px;">
-      <div class="card-head"><h3>Последние лиды</h3><a href="#/store/leads" class="text-sm">Все лиды →</a></div>
-      <div class="table-wrap">
-        <table>
-          <thead><tr><th>Источник</th><th>Имя</th><th>Телефон</th><th>Интересует</th><th>Время</th><th>Статус</th></tr></thead>
-          <tbody>
-            <tr onclick="openDeal()"><td><span class="badge badge-site badge-dot">Сайт</span></td><td class="cell-strong">Виктор Синицын</td><td class="num">+7 918 400-11-22</td><td>Входная дверь, Гефест Термо</td><td class="cell-muted">10:42</td><td><span class="badge badge-accent">Новый</span></td></tr>
-            <tr onclick="openDeal()"><td><span class="badge badge-tg badge-dot">Telegram</span></td><td class="cell-strong">Ольга Матвеева</td><td class="num">+7 928 511-22-33</td><td>МК, скрытые двери</td><td class="cell-muted">10:15</td><td><span class="badge badge-warning">В работе</span></td></tr>
-            <tr onclick="openDeal()"><td><span class="badge badge-call badge-dot">Звонок</span></td><td class="cell-strong">Дмитрий Крылов</td><td class="num">+7 900 233-44-55</td><td>Замер, входная</td><td class="cell-muted">09:58</td><td><span class="badge badge-warning">В работе</span></td></tr>
-            <tr onclick="openDeal()"><td><span class="badge badge-avito badge-dot">Avito</span></td><td class="cell-strong">Наталья Ефимова</td><td class="num">+7 951 622-33-44</td><td>Межкомнатные, 5 шт</td><td class="cell-muted">09:30</td><td><span class="badge badge-accent">Новый</span></td></tr>
-            <tr onclick="openDeal()"><td><span class="badge badge-whatsapp badge-dot">WhatsApp</span></td><td class="cell-strong">Сергей Гуляев</td><td class="num">+7 908 744-55-66</td><td>Повторная покупка</td><td class="cell-muted">09:02</td><td><span class="badge badge-accent">Новый</span></td></tr>
-          </tbody>
-        </table>
-      </div>
+    <div class="tile-grid">
+      <a class="tile" href="#/store-configurator">
+        <div class="tile-icon"><svg class="icon" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M10.5 6h9.75M10.5 6a1.5 1.5 0 11-3 0m3 0a1.5 1.5 0 10-3 0M3.75 6H7.5m3 12h9.75m-9.75 0a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m-3.75 0H7.5m9-6h3.75m-3.75 0a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m-9.75 0h9.75"/></svg></div>
+        <h3>Конфигураторы дверей</h3>
+        <p>Расчёт комплектов по фабрикам — размер, опции, фурнитура и сразу 4 цены</p>
+        <span class="tile-cta">Открыть →</span>
+      </a>
+      <a class="tile" href="#/store-leads">
+        <div class="tile-icon"><svg class="icon" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M15 19.128zM8.625 10.5a3.375 3.375 0 100-6.75 3.375 3.375 0 000 6.75zm7.5-3a3 3 0 11-6 0 3 3 0 016 0z"/></svg></div>
+        <h3>CRM</h3>
+        <p>Лиды, воронка «Розница», сделки и карточки клиентов в одном месте</p>
+        <span class="tile-cta">Открыть →</span>
+      </a>
+      <a class="tile" href="#/store-forms">
+        <div class="tile-icon"><svg class="icon" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15.666 3.888A2.25 2.25 0 0013.5 2.25h-3a2.25 2.25 0 00-2.166 1.638m7.332 0c.055.194.084.4.084.612v0a.75.75 0 01-.75.75H9a.75.75 0 01-.75-.75v0c0-.212.03-.418.084-.612m7.332 0c.646.049 1.288.11 1.927.184 1.1.128 1.907 1.077 1.907 2.185V19.5a2.25 2.25 0 01-2.25 2.25H6.75A2.25 2.25 0 014.5 19.5V6.257c0-1.108.806-2.057 1.907-2.185a48.208 48.208 0 011.927-.184"/></svg></div>
+        <h3>Бланки обслуживания</h3>
+        <p>Формы «Звонок», ВХ и МК — заполнить цифровой или загрузить скан</p>
+        <span class="tile-cta">Открыть →</span>
+      </a>
+      <a class="tile" href="#/store-reports">
+        <div class="tile-icon"><svg class="icon" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z"/></svg></div>
+        <h3>Отчёты и аналитика</h3>
+        <p>Воронка продаж, конверсия по стадиям, причины отказа, доходность</p>
+        <span class="tile-cta">Открыть →</span>
+      </a>
+      <a class="tile" href="#/store-billing">
+        <div class="tile-icon"><svg class="icon" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 8.25h19.5M2.25 9h19.5m-16.5 5.25h6m-6 2.25h3m-3.75 3h15a2.25 2.25 0 002.25-2.25V6.75A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25v10.5A2.25 2.25 0 004.5 19.5z"/></svg></div>
+        <h3>Биллинг и подписка</h3>
+        <p>Пакеты подписки, счета магазина, подключённые фабрики</p>
+        <span class="tile-cta">Открыть →</span>
+      </a>
+      <a class="tile" href="#/store-contractors">
+        <div class="tile-icon"><svg class="icon" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 18.75a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m3 0h6m-9 0H3.375a1.125 1.125 0 01-1.125-1.125V14.25m17.25 4.5a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m3 0h1.125c.621 0 1.129-.504 1.09-1.124a17.902 17.902 0 00-3.213-9.193 2.056 2.056 0 00-1.58-.86H14.25M16.5 18.75h-2.25m0-11.25h5.19c.317 0 .612.162.783.43l2.5 4.03H14.25M14.25 7.5v11.25m0-11.25H8.25m0 0H4.5a1.5 1.5 0 00-1.5 1.5v7.5c0 .414.336.75.75.75h.75"/></svg></div>
+        <h3>Внешние исполнители</h3>
+        <p>Замерщики, монтажные бригады, доставка — без их регистрации</p>
+        <span class="tile-cta">Открыть →</span>
+      </a>
+      <a class="tile" href="#/store-settings">
+        <div class="tile-icon"><svg class="icon" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9.594 3.94c.09-.542.56-.94 1.11-.94h2.593c.55 0 1.02.398 1.11.94l.213 1.281c.063.374.313.686.645.87.074.04.147.083.22.127.324.196.72.257 1.075.124l1.217-.456a1.125 1.125 0 011.37.49l1.296 2.245a1.125 1.125 0 01-.26 1.431l-1.003.827c-.293.24-.438.613-.431.992a6.759 6.759 0 010 .255c-.007.378.138.75.43.99l1.005.828c.424.35.534.954.26 1.43l-1.298 2.247a1.125 1.125 0 01-1.369.491l-1.217-.456c-.355-.133-.75-.072-1.076.124a6.57 6.57 0 01-.22.128c-.331.183-.581.495-.644.869l-.213 1.28c-.09.543-.56.941-1.11.941h-2.594c-.55 0-1.02-.398-1.11-.94l-.213-1.281c-.062-.374-.312-.686-.644-.87a6.52 6.52 0 01-.22-.127c-.325-.196-.72-.257-1.076-.124l-1.217.456a1.125 1.125 0 01-1.369-.49l-1.297-2.245a1.125 1.125 0 01.26-1.431l1.004-.827c.292-.24.437-.613.43-.992a6.932 6.932 0 010-.255c.007-.378-.138-.75-.43-.99l-1.004-.828a1.125 1.125 0 01-.26-1.43l1.297-2.247a1.125 1.125 0 011.37-.491l1.216.456c.356.133.751.072 1.076-.124.072-.044.146-.087.22-.128.332-.183.582-.495.644-.869l.214-1.28zM15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg></div>
+        <h3>Настройки</h3>
+        <p>Реквизиты магазина, свои цены, сотрудники и права доступа</p>
+        <span class="tile-cta">Открыть →</span>
+      </a>
     </div>
   </section>
 
@@ -707,6 +685,25 @@ th.sortable:hover{color:var(--fg);}
       <span class="view-tag">Согласуем: как выглядит единая лента входящих обращений из всех каналов</span>
       <h1 class="view-title">Лиды</h1>
       <p class="view-sub">Приходят из сайта, лид-бота, Telegram, Avito и WhatsApp — далее вручную или автоматически превращаются в сделку</p>
+    </div>
+
+    <div class="summary-strip">
+      <div class="summary-chip">
+        <div class="kpi-icon"><svg class="icon" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M8.625 10.5a3.375 3.375 0 100-6.75 3.375 3.375 0 000 6.75z"/></svg></div>
+        <div><div class="sc-value num">27</div><div class="sc-label">Лиды сегодня</div></div>
+      </div>
+      <div class="summary-chip">
+        <div class="kpi-icon"><svg class="icon" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M20.25 14.15v4.25c0 1.094-.787 2.036-1.872 2.18-2.087.277-4.216.42-6.378.42s-4.291-.143-6.378-.42c-1.085-.144-1.872-1.086-1.872-2.18v-4.25"/></svg></div>
+        <div><div class="sc-value num">143</div><div class="sc-label">Сделки в работе</div></div>
+      </div>
+      <div class="summary-chip">
+        <div class="kpi-icon"><svg class="icon" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 8.25h19.5M2.25 9h19.5m-16.5 5.25h6"/></svg></div>
+        <div><div class="sc-value num">4,2 млн ₽</div><div class="sc-label">Выручка за месяц</div></div>
+      </div>
+      <div class="summary-chip">
+        <div class="kpi-icon"><svg class="icon" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 3c2.755 0 5.455.232 8.083.678M12 3v18"/></svg></div>
+        <div><div class="sc-value num">34%</div><div class="sc-label">Конверсия в продажу</div></div>
+      </div>
     </div>
 
     <div class="card card-pad" style="margin-bottom:16px;">
@@ -1071,7 +1068,7 @@ th.sortable:hover{color:var(--fg);}
         <div class="card card-pad" style="margin-bottom:20px;">
           <div class="card-head"><h3>Бланк обслуживания</h3></div>
           <div class="gap-8-wrap">
-            <button class="btn btn-accent" onclick="location.hash='#/store/forms'"><svg class="icon icon-sm" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/></svg>Активировать форму (ВХ/МК/Звонок)</button>
+            <button class="btn btn-accent" onclick="location.hash='#/store-forms'"><svg class="icon icon-sm" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/></svg>Активировать форму (ВХ/МК/Звонок)</button>
             <button class="btn"><svg class="icon icon-sm" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75V15m3-8.25v6m3-3.75V15M6.75 4.5h10.5A1.5 1.5 0 0118.75 6v13.5a1.5 1.5 0 01-1.5 1.5H6.75a1.5 1.5 0 01-1.5-1.5V6a1.5 1.5 0 011.5-1.5z"/></svg>Загрузить скан</button>
           </div>
         </div>
