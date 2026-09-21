@@ -1,0 +1,2365 @@
+<!DOCTYPE html>
+<html lang="ru" data-cabinet="store">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Помощник для дверника — прототип</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --primary:#0F172A; --on-primary:#FFFFFF; --secondary:#334155; --accent:#0369A1;
+  --bg:#F8FAFC; --fg:#020617; --muted:#E8ECF1; --border:#E2E8F0;
+  --danger:#DC2626; --success:#16A34A; --warning:#D97706;
+  --surface:#FFFFFF; --surface-2:#F1F5F9;
+  --accent-soft:#E0F2FE; --danger-soft:#FEE2E2; --success-soft:#DCFCE7; --warning-soft:#FEF3C7;
+  --shadow-sm:0 1px 2px rgba(15,23,42,.06);
+  --shadow-md:0 4px 12px rgba(15,23,42,.08);
+  --shadow-lg:0 12px 32px rgba(15,23,42,.14);
+  --radius-sm:8px; --radius-md:12px; --radius-lg:16px;
+  --font: 'Plus Jakarta Sans', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0F172A; --surface:#1E293B; --surface-2:#16223A; --fg:#F1F5F9; --border:#334155;
+    --muted:#243247; --on-primary:#F1F5F9; --accent:#38BDF8; --accent-soft:#0C3A52;
+    --danger-soft:#3A1518; --success-soft:#123424; --warning-soft:#3A2A0C;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0F172A; --surface:#1E293B; --surface-2:#16223A; --fg:#F1F5F9; --border:#334155;
+  --muted:#243247; --on-primary:#F1F5F9; --accent:#38BDF8; --accent-soft:#0C3A52;
+  --danger-soft:#3A1518; --success-soft:#123424; --warning-soft:#3A2A0C;
+  color-scheme: dark;
+}
+*,*::before,*::after{box-sizing:border-box;}
+@media (prefers-reduced-motion: reduce){*{animation:none!important;transition:none!important;}}
+html,body{height:100%;}
+body{
+  margin:0; background:var(--bg); color:var(--fg); font-family:var(--font);
+  font-weight:400; font-size:14px; line-height:1.45; -webkit-font-smoothing:antialiased;
+}
+h1,h2,h3,h4{margin:0; font-weight:700; letter-spacing:-.01em;}
+p{margin:0;}
+a{color:var(--accent); text-decoration:none;}
+button{font-family:inherit; font-size:inherit; color:inherit;}
+input,select,textarea{font-family:inherit; font-size:inherit;}
+::-webkit-scrollbar{width:10px; height:10px;}
+::-webkit-scrollbar-thumb{background:var(--border); border-radius:8px;}
+::-webkit-scrollbar-track{background:transparent;}
+.num{font-variant-numeric:tabular-nums;}
+:focus-visible{outline:2px solid var(--accent); outline-offset:2px; border-radius:4px;}
+[hidden]{display:none!important;}
+svg.icon{width:20px; height:20px; flex-shrink:0; stroke:currentColor; fill:none; stroke-width:1.6;}
+.icon-sm{width:16px;height:16px;}
+.icon-lg{width:24px;height:24px;}
+
+/* ===== APP SHELL ===== */
+.app{display:grid; grid-template-columns:auto 1fr; grid-template-rows:64px 1fr; height:100vh; overflow:hidden;}
+.app.sidebar-collapsed{grid-template-columns:auto 1fr;}
+
+.sidebar{
+  grid-row:1/3; grid-column:1; width:264px; background:var(--surface); border-right:1px solid var(--border);
+  display:flex; flex-direction:column; transition:width 200ms ease-out; overflow:hidden;
+}
+.sidebar-collapsed .sidebar{width:76px;}
+.sidebar-head{display:flex; align-items:center; gap:10px; padding:16px; height:64px; border-bottom:1px solid var(--border); flex-shrink:0;}
+.brand-mark{width:36px; height:36px; border-radius:10px; background:var(--primary); color:var(--on-primary); display:flex; align-items:center; justify-content:center; flex-shrink:0; font-weight:700;}
+.brand-text{white-space:nowrap; overflow:hidden;}
+.brand-text b{display:block; font-size:14px;}
+.brand-text span{display:block; font-size:11px; color:var(--secondary);}
+.sidebar-collapsed .brand-text{display:none;}
+.sidebar-toggle{margin-left:auto; width:32px; height:32px; border-radius:8px; border:1px solid var(--border); background:transparent; display:flex; align-items:center; justify-content:center; cursor:pointer; flex-shrink:0;}
+.sidebar-toggle:hover{background:var(--surface-2);}
+.sidebar-collapsed .sidebar-toggle{margin-left:0;}
+
+.nav{flex:1; overflow-y:auto; padding:12px 10px;}
+.nav-section-label{font-size:11px; text-transform:uppercase; letter-spacing:.06em; color:var(--secondary); padding:14px 12px 6px; white-space:nowrap;}
+.sidebar-collapsed .nav-section-label{display:none;}
+.nav-item{
+  display:flex; align-items:center; gap:12px; padding:10px 12px; border-radius:var(--radius-sm); color:var(--secondary);
+  cursor:pointer; margin-bottom:2px; white-space:nowrap; min-height:44px; border:1px solid transparent;
+  transition:background 150ms ease-out, color 150ms ease-out;
+}
+.nav-item svg{flex-shrink:0;}
+.nav-item:hover{background:var(--surface-2); color:var(--fg);}
+.nav-item.active{background:var(--accent-soft); color:var(--accent); font-weight:600;}
+.nav-item .label{overflow:hidden; text-overflow:ellipsis;}
+.sidebar-collapsed .nav-item .label{display:none;}
+.sidebar-collapsed .nav-item{justify-content:center;}
+.sidebar-collapsed .nav-section-label{display:none;}
+
+.sidebar-foot{padding:12px; border-top:1px solid var(--border); flex-shrink:0;}
+.sidebar-foot .nav-item{color:var(--secondary);}
+
+/* ===== TOPBAR ===== */
+.topbar{
+  grid-row:1; grid-column:2; height:64px; background:var(--surface); border-bottom:1px solid var(--border);
+  display:flex; align-items:center; gap:16px; padding:0 20px; min-width:0;
+}
+.segmented{display:flex; background:var(--surface-2); border-radius:10px; padding:3px; gap:2px; flex-shrink:0;}
+.segmented button{
+  padding:8px 14px; border:none; background:transparent; border-radius:8px; cursor:pointer; color:var(--secondary);
+  font-weight:500; font-size:13px; min-height:38px; white-space:nowrap; transition:background 150ms ease-out,color 150ms ease-out;
+}
+.segmented button:hover{color:var(--fg);}
+.segmented button.active{background:var(--surface); color:var(--primary); box-shadow:var(--shadow-sm); font-weight:700;}
+:root[data-theme="dark"] .segmented button.active{color:var(--fg);}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .segmented button.active{color:var(--fg);}}
+
+.topbar-search{flex:1; max-width:420px; position:relative; min-width:0;}
+.topbar-search input{
+  width:100%; height:40px; border-radius:10px; border:1px solid var(--border); background:var(--surface-2);
+  padding:0 14px 0 40px; color:var(--fg); transition:border-color 150ms ease-out, background 150ms ease-out;
+}
+.topbar-search input:focus{background:var(--surface); border-color:var(--accent);}
+.topbar-search svg{position:absolute; left:12px; top:50%; transform:translateY(-50%); color:var(--secondary); pointer-events:none;}
+
+.topbar-right{display:flex; align-items:center; gap:10px; margin-left:auto; flex-shrink:0;}
+.icon-btn{
+  width:40px; height:40px; border-radius:10px; border:1px solid var(--border); background:var(--surface);
+  display:flex; align-items:center; justify-content:center; cursor:pointer; color:var(--secondary);
+  transition:background 150ms ease-out, color 150ms ease-out;
+}
+.icon-btn:hover{background:var(--surface-2); color:var(--fg);}
+.user-chip{display:flex; align-items:center; gap:10px; padding:6px 12px 6px 6px; border-radius:12px; border:1px solid var(--border); cursor:pointer; background:var(--surface);}
+.user-chip:hover{background:var(--surface-2);}
+.avatar{width:32px; height:32px; border-radius:50%; background:linear-gradient(135deg,var(--accent),var(--primary)); color:#fff; display:flex; align-items:center; justify-content:center; font-weight:700; font-size:13px; flex-shrink:0;}
+.user-chip .who{line-height:1.2;}
+.user-chip .who b{display:block; font-size:13px;}
+.user-chip .who span{display:block; font-size:11px; color:var(--secondary);}
+
+/* ===== MAIN ===== */
+.main{grid-row:2; grid-column:2; overflow-y:auto; overflow-x:hidden; padding:24px 28px 60px; min-width:0;}
+.view{max-width:1520px; margin:0 auto;}
+.view-head{margin-bottom:20px;}
+.view-tag{
+  display:inline-flex; align-items:center; gap:6px; font-size:12px; font-weight:600; color:var(--accent);
+  background:var(--accent-soft); padding:4px 10px; border-radius:20px; margin-bottom:10px;
+}
+.view-title{font-size:24px; margin-bottom:4px;}
+.view-sub{color:var(--secondary); font-size:13px;}
+
+/* ===== CARD / GRID ===== */
+.card{background:var(--surface); border:1px solid var(--border); border-radius:var(--radius-md); box-shadow:var(--shadow-sm);}
+.card-pad{padding:20px;}
+.card-head{display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:16px;}
+.card-head h3{font-size:15px;}
+.grid{display:grid; gap:16px;}
+.grid-2{grid-template-columns:repeat(2,1fr);}
+.grid-3{grid-template-columns:repeat(3,1fr);}
+.grid-4{grid-template-columns:repeat(4,1fr);}
+@media (max-width:1024px){.grid-4{grid-template-columns:repeat(2,1fr);} .grid-3{grid-template-columns:repeat(2,1fr);}}
+@media (max-width:768px){.grid-4,.grid-3,.grid-2{grid-template-columns:1fr;}}
+@media (min-width:1440px){.main{padding:32px 40px 60px;} .view{max-width:1600px;} .grid{gap:20px;}}
+
+/* ===== BUTTONS ===== */
+.btn{
+  display:inline-flex; align-items:center; justify-content:center; gap:8px; min-height:40px; padding:0 16px;
+  border-radius:var(--radius-sm); border:1px solid var(--border); background:var(--surface); color:var(--fg);
+  cursor:pointer; font-weight:600; font-size:13px; transition:background 150ms ease-out, border-color 150ms ease-out, color 150ms ease-out, transform 150ms ease-out;
+  white-space:nowrap;
+}
+.btn:hover{background:var(--surface-2);}
+.btn:active{transform:translateY(1px);}
+.btn-primary{background:var(--primary); border-color:var(--primary); color:var(--on-primary);}
+.btn-primary:hover{background:#1E2B45;}
+.btn-accent{background:var(--accent); border-color:var(--accent); color:#fff;}
+.btn-accent:hover{filter:brightness(1.08);}
+.btn-ghost{background:transparent; border-color:transparent;}
+.btn-ghost:hover{background:var(--surface-2);}
+.btn-danger{color:var(--danger); border-color:var(--danger-soft); background:var(--danger-soft);}
+.btn-danger:hover{filter:brightness(0.97);}
+.btn-sm{min-height:32px; padding:0 12px; font-size:12px; border-radius:8px;}
+.btn-block{width:100%;}
+.btn[disabled]{opacity:.5; cursor:not-allowed;}
+
+/* ===== BADGES ===== */
+.badge{
+  display:inline-flex; align-items:center; gap:5px; padding:3px 10px; border-radius:20px; font-size:12px; font-weight:600;
+  white-space:nowrap;
+}
+.badge-dot::before{content:""; width:6px; height:6px; border-radius:50%; background:currentColor;}
+.badge-neutral{background:var(--muted); color:var(--secondary);}
+.badge-accent{background:var(--accent-soft); color:var(--accent);}
+.badge-success{background:var(--success-soft); color:var(--success);}
+.badge-warning{background:var(--warning-soft); color:var(--warning);}
+.badge-danger{background:var(--danger-soft); color:var(--danger);}
+.badge-site{background:#E0E7FF; color:#4338CA;}
+.badge-call{background:#FEF3C7; color:#92400E;}
+.badge-tg{background:#DBEAFE; color:#1D4ED8;}
+.badge-avito{background:#DCFCE7; color:#15803D;}
+.badge-whatsapp{background:#D1FAE5; color:#047857;}
+:root[data-theme="dark"] .badge-site,:root[data-theme="dark"] .badge-call,:root[data-theme="dark"] .badge-tg,:root[data-theme="dark"] .badge-avito,:root[data-theme="dark"] .badge-whatsapp{filter:brightness(1.3) saturate(0.7);}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .badge-site,:root:not([data-theme="light"]) .badge-call,:root:not([data-theme="light"]) .badge-tg,:root:not([data-theme="light"]) .badge-avito,:root:not([data-theme="light"]) .badge-whatsapp{filter:brightness(1.3) saturate(0.7);}}
+
+/* ===== TABLE ===== */
+.table-wrap{overflow-x:auto; border-radius:var(--radius-md); border:1px solid var(--border);}
+table{width:100%; border-collapse:collapse; min-width:720px; background:var(--surface);}
+thead th{
+  text-align:left; font-size:11px; text-transform:uppercase; letter-spacing:.04em; color:var(--secondary);
+  padding:12px 16px; background:var(--surface-2); border-bottom:1px solid var(--border); white-space:nowrap; position:sticky; top:0;
+}
+tbody td{padding:14px 16px; border-bottom:1px solid var(--border); vertical-align:middle;}
+tbody tr:last-child td{border-bottom:none;}
+tbody tr{transition:background 150ms ease-out; cursor:pointer;}
+tbody tr:hover{background:var(--surface-2);}
+th.sortable{cursor:pointer; user-select:none;}
+th.sortable:hover{color:var(--fg);}
+.th-flex{display:inline-flex; align-items:center; gap:4px;}
+.cell-strong{font-weight:600;}
+.cell-muted{color:var(--secondary); font-size:12px;}
+
+/* ===== KPI ===== */
+.kpi-card{padding:18px 20px; display:flex; flex-direction:column; gap:10px;}
+.kpi-top{display:flex; align-items:center; justify-content:space-between;}
+.kpi-icon{width:38px; height:38px; border-radius:10px; display:flex; align-items:center; justify-content:center; background:var(--accent-soft); color:var(--accent); flex-shrink:0;}
+.kpi-value{font-size:26px; font-weight:700;}
+.kpi-label{color:var(--secondary); font-size:13px;}
+.kpi-delta{font-size:12px; font-weight:600; display:inline-flex; align-items:center; gap:4px;}
+.kpi-delta.up{color:var(--success);}
+.kpi-delta.down{color:var(--danger);}
+
+/* ===== MINI FUNNEL ===== */
+.mini-funnel{display:flex; flex-direction:column; gap:10px;}
+.mf-row{display:flex; align-items:center; gap:12px;}
+.mf-label{width:150px; flex-shrink:0; font-size:13px; color:var(--secondary);}
+.mf-bar-track{flex:1; height:16px; background:var(--muted); border-radius:8px; overflow:hidden;}
+.mf-bar-fill{height:100%; background:linear-gradient(90deg,var(--accent),var(--primary)); border-radius:8px; transition:width 400ms ease-out;}
+.mf-value{width:56px; text-align:right; font-weight:700; flex-shrink:0;}
+
+/* ===== LISTS ===== */
+.list{display:flex; flex-direction:column; gap:2px;}
+.list-item{display:flex; align-items:center; gap:12px; padding:12px 8px; border-radius:var(--radius-sm); transition:background 150ms ease-out;}
+.list-item:hover{background:var(--surface-2);}
+.list-item + .list-item{border-top:1px solid var(--border);}
+.list-check{width:20px; height:20px; border-radius:6px; border:1.6px solid var(--border); flex-shrink:0; cursor:pointer; display:flex; align-items:center; justify-content:center; color:var(--success); transition:border-color 150ms ease-out;}
+.list-check:hover{border-color:var(--success);}
+.list-check.checked{background:var(--success-soft); border-color:var(--success);}
+.list-check.checked svg{display:block;}
+.list-check svg{display:none; width:14px; height:14px;}
+.list-main{flex:1; min-width:0;}
+.list-title{font-weight:600; font-size:13px;}
+.list-sub{font-size:12px; color:var(--secondary); margin-top:2px;}
+
+/* ===== EMPTY / SKELETON ===== */
+.empty-state{display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; padding:48px 20px; color:var(--secondary); gap:10px;}
+.empty-state svg{color:var(--border); width:48px; height:48px;}
+.empty-state b{color:var(--fg); font-size:14px;}
+.skeleton{background:linear-gradient(90deg,var(--muted) 25%, var(--surface-2) 37%, var(--muted) 63%); background-size:400% 100%; animation:sk 1.4s ease infinite; border-radius:8px;}
+@keyframes sk{0%{background-position:100% 50%;}100%{background-position:0 50%;}}
+@media (prefers-reduced-motion: reduce){.skeleton{animation:none; background:var(--muted);}}
+
+/* ===== TABS ===== */
+.tabs{display:flex; gap:4px; border-bottom:1px solid var(--border); margin-bottom:18px;}
+.tab-btn{padding:10px 4px; margin-right:20px; border:none; background:none; cursor:pointer; color:var(--secondary); font-weight:600; font-size:13px; border-bottom:2px solid transparent; margin-bottom:-1px; min-height:44px; transition:color 150ms ease-out, border-color 150ms ease-out;}
+.tab-btn:hover{color:var(--fg);}
+.tab-btn.active{color:var(--accent); border-color:var(--accent);}
+
+/* ===== KANBAN ===== */
+.kanban-scroll{overflow-x:auto; padding-bottom:8px;}
+.kanban{display:flex; gap:14px; min-width:max-content;}
+.kanban-col{width:264px; flex-shrink:0; background:var(--surface-2); border-radius:var(--radius-md); display:flex; flex-direction:column; max-height:calc(100vh - 320px); min-height:200px;}
+.kanban-col-head{padding:12px 14px; display:flex; align-items:center; justify-content:space-between; border-bottom:1px solid var(--border); flex-shrink:0;}
+.kanban-col-head b{font-size:12.5px;}
+.kanban-count{background:var(--surface); border-radius:20px; padding:1px 8px; font-size:11px; font-weight:700; color:var(--secondary);}
+.kanban-cards{padding:10px; display:flex; flex-direction:column; gap:10px; overflow-y:auto;}
+.kanban-card{background:var(--surface); border:1px solid var(--border); border-radius:var(--radius-sm); padding:12px; cursor:pointer; box-shadow:var(--shadow-sm); transition:box-shadow 150ms ease-out, transform 150ms ease-out;}
+.kanban-card:hover{box-shadow:var(--shadow-md); transform:translateY(-1px);}
+.kc-top{display:flex; align-items:start; justify-content:space-between; gap:6px;}
+.kc-client{font-weight:700; font-size:13px;}
+.kc-menu-btn{width:26px; height:26px; border-radius:6px; border:none; background:transparent; color:var(--secondary); display:flex; align-items:center; justify-content:center; cursor:pointer; flex-shrink:0; position:relative;}
+.kc-menu-btn:hover{background:var(--muted); color:var(--fg);}
+.kc-sum{font-weight:700; color:var(--primary); margin-top:6px;}
+:root[data-theme="dark"] .kc-sum{color:var(--fg);}
+.kc-meta{display:flex; align-items:center; justify-content:space-between; margin-top:10px; font-size:11.5px; color:var(--secondary);}
+.kc-avatar{width:22px; height:22px; border-radius:50%; background:var(--muted); display:flex; align-items:center; justify-content:center; font-size:10px; font-weight:700; color:var(--secondary);}
+.kc-due{display:inline-flex; align-items:center; gap:4px;}
+.kc-due.urgent{color:var(--danger); font-weight:700;}
+
+.stage-menu{
+  position:absolute; top:28px; right:0; background:var(--surface); border:1px solid var(--border); border-radius:var(--radius-sm);
+  box-shadow:var(--shadow-lg); z-index:40; width:220px; padding:6px; max-height:280px; overflow-y:auto;
+}
+.stage-menu button{display:block; width:100%; text-align:left; padding:9px 10px; border:none; background:none; border-radius:6px; cursor:pointer; font-size:12.5px; min-height:36px;}
+.stage-menu button:hover{background:var(--surface-2);}
+.stage-menu button.current{color:var(--accent); font-weight:700;}
+
+.funnel-flags{display:flex; gap:10px; margin-top:16px; flex-wrap:wrap;}
+.flag-card{display:flex; align-items:center; gap:10px; padding:10px 14px; border-radius:var(--radius-sm); border:1px solid var(--border); background:var(--surface);}
+
+/* ===== STEPPER (deal card tracks) ===== */
+.track{margin-bottom:22px;}
+.track-head{display:flex; align-items:center; justify-content:space-between; margin-bottom:12px;}
+.track-name{font-size:12px; text-transform:uppercase; letter-spacing:.05em; color:var(--secondary); font-weight:700; display:flex; align-items:center; gap:6px;}
+.stepper{display:flex; align-items:center;}
+.step{display:flex; flex-direction:column; align-items:center; gap:6px; flex:1; position:relative; min-width:0;}
+.step .dot{width:26px; height:26px; border-radius:50%; background:var(--muted); border:2px solid var(--border); display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:700; color:var(--secondary); z-index:1; flex-shrink:0; transition:background 200ms ease-out,border-color 200ms ease-out,color 200ms ease-out;}
+.step .line{position:absolute; top:13px; left:50%; width:100%; height:2px; background:var(--border); z-index:0;}
+.step:last-child .line{display:none;}
+.step .lbl{font-size:10.5px; color:var(--secondary); text-align:center; max-width:90px;}
+.step.done .dot{background:var(--success); border-color:var(--success); color:#fff;}
+.step.done .line{background:var(--success);}
+.step.current .dot{background:var(--accent); border-color:var(--accent); color:#fff; box-shadow:0 0 0 4px var(--accent-soft);}
+.step.current .lbl{color:var(--fg); font-weight:700;}
+.track-flag{display:inline-flex; align-items:center; gap:5px;}
+
+/* ===== ACCORDION (объект/проёмы) ===== */
+.accordion-item{border:1px solid var(--border); border-radius:var(--radius-sm); margin-bottom:10px; overflow:hidden;}
+.accordion-head{display:flex; align-items:center; justify-content:space-between; padding:13px 16px; cursor:pointer; background:var(--surface-2); min-height:44px;}
+.accordion-head:hover{background:var(--muted);}
+.accordion-head b{font-size:13px;}
+.accordion-head .chev{transition:transform 200ms ease-out; color:var(--secondary);}
+.accordion-item.open .chev{transform:rotate(180deg);}
+.accordion-body{padding:14px 16px; display:none; border-top:1px solid var(--border);}
+.accordion-item.open .accordion-body{display:block;}
+
+.price-row{display:grid; grid-template-columns:1.6fr repeat(4,1fr); gap:8px; align-items:center; padding:10px 0; border-bottom:1px dashed var(--border); font-size:12.5px;}
+.price-row:last-child{border-bottom:none;}
+.price-row.head{font-size:10.5px; text-transform:uppercase; color:var(--secondary); font-weight:700; letter-spacing:.03em;}
+.price-cell{text-align:right;}
+.price-cell.name{text-align:left; font-weight:600;}
+.price-cell .lock{display:inline-flex; color:var(--warning); margin-right:3px; vertical-align:-3px;}
+@media (max-width:768px){.price-row{grid-template-columns:1fr; text-align:left;} .price-cell{text-align:left;}}
+
+/* ===== MODAL / DEAL PANEL ===== */
+.overlay{position:fixed; inset:0; background:rgba(2,6,23,.45); display:flex; justify-content:flex-end; z-index:100; opacity:0; pointer-events:none; transition:opacity 200ms ease-out;}
+.overlay.open{opacity:1; pointer-events:auto;}
+.panel{width:min(920px,96vw); height:100%; background:var(--bg); box-shadow:var(--shadow-lg); transform:translateX(24px); transition:transform 200ms ease-out; display:flex; flex-direction:column; overflow:hidden;}
+.overlay.open .panel{transform:translateX(0);}
+.panel-head{padding:18px 24px; background:var(--surface); border-bottom:1px solid var(--border); display:flex; align-items:start; justify-content:space-between; gap:16px; flex-shrink:0;}
+.panel-body{flex:1; overflow-y:auto; padding:22px 24px 60px;}
+.panel-close{width:36px; height:36px; border-radius:10px; border:1px solid var(--border); background:var(--surface); display:flex; align-items:center; justify-content:center; cursor:pointer; flex-shrink:0;}
+.panel-close:hover{background:var(--surface-2);}
+
+.modal-center{position:fixed; inset:0; background:rgba(2,6,23,.45); display:flex; align-items:center; justify-content:center; z-index:110; opacity:0; pointer-events:none; transition:opacity 200ms ease-out; padding:20px;}
+.modal-center.open{opacity:1; pointer-events:auto;}
+.modal-box{width:min(680px,100%); max-height:88vh; overflow-y:auto; background:var(--surface); border-radius:var(--radius-lg); box-shadow:var(--shadow-lg); transform:scale(.97); transition:transform 200ms ease-out;}
+.modal-center.open .modal-box{transform:scale(1);}
+.modal-box-head{padding:20px 22px; border-bottom:1px solid var(--border); display:flex; align-items:center; justify-content:space-between; position:sticky; top:0; background:var(--surface); z-index:2;}
+.modal-box-body{padding:20px 22px;}
+
+/* ===== FORMS ===== */
+.field{display:flex; flex-direction:column; gap:6px; margin-bottom:14px;}
+.field label{font-size:12px; font-weight:600; color:var(--secondary);}
+.field input[type=text],.field input[type=tel],.field input[type=email],.field input[type=date],.field input[type=time],.field select,.field textarea{
+  min-height:40px; border-radius:var(--radius-sm); border:1px solid var(--border); background:var(--surface); color:var(--fg); padding:0 12px;
+  transition:border-color 150ms ease-out;
+}
+.field textarea{padding:10px 12px; min-height:70px; resize:vertical;}
+.field input:focus,.field select:focus,.field textarea:focus{border-color:var(--accent);}
+.choice-group{display:flex; flex-wrap:wrap; gap:8px;}
+.choice{
+  display:inline-flex; align-items:center; gap:7px; padding:8px 13px; border-radius:20px; border:1px solid var(--border);
+  background:var(--surface); cursor:pointer; font-size:12.5px; min-height:38px; transition:background 150ms ease-out,border-color 150ms ease-out,color 150ms ease-out;
+}
+.choice:hover{border-color:var(--accent);}
+.choice input{position:absolute; opacity:0; width:0; height:0;}
+.choice.checked{background:var(--accent-soft); border-color:var(--accent); color:var(--accent); font-weight:700;}
+.field-grid{display:grid; grid-template-columns:1fr 1fr; gap:14px;}
+@media (max-width:768px){.field-grid{grid-template-columns:1fr;}}
+.form-mode-switch{display:flex; gap:8px; margin-bottom:18px;}
+.section-divider{font-size:12px; text-transform:uppercase; letter-spacing:.05em; color:var(--secondary); font-weight:700; margin:20px 0 12px; padding-top:14px; border-top:1px solid var(--border);}
+.section-divider:first-child{border-top:none; margin-top:0; padding-top:0;}
+.dropzone{border:2px dashed var(--border); border-radius:var(--radius-md); padding:36px 20px; text-align:center; color:var(--secondary); cursor:pointer; transition:border-color 150ms ease-out, background 150ms ease-out;}
+.dropzone:hover{border-color:var(--accent); background:var(--accent-soft);}
+.autonote{font-size:12px; color:var(--secondary); display:flex; align-items:center; gap:6px; margin-top:14px; padding:10px 12px; background:var(--accent-soft); border-radius:var(--radius-sm); color:var(--accent);}
+
+/* ===== TOAST ===== */
+.toast-wrap{position:fixed; bottom:20px; right:20px; z-index:200; display:flex; flex-direction:column; gap:8px;}
+.toast{background:var(--primary); color:var(--on-primary); padding:12px 18px; border-radius:var(--radius-sm); box-shadow:var(--shadow-lg); font-size:13px; font-weight:600; opacity:0; transform:translateY(8px); transition:opacity 200ms ease-out, transform 200ms ease-out; display:flex; align-items:center; gap:8px;}
+.toast.show{opacity:1; transform:translateY(0);}
+
+/* ===== TOOLTIP ===== */
+.tip{position:relative; cursor:help;}
+.tip:hover .tip-bubble,.tip:focus-visible .tip-bubble{opacity:1; pointer-events:auto;}
+.tip-bubble{position:absolute; bottom:130%; left:50%; transform:translateX(-50%); background:var(--primary); color:var(--on-primary); padding:6px 10px; border-radius:6px; font-size:11px; white-space:nowrap; opacity:0; pointer-events:none; transition:opacity 150ms ease-out; z-index:30; font-weight:500;}
+
+/* ===== REPORTS CHARTS ===== */
+.bar-chart{display:flex; align-items:end; gap:14px; height:220px; padding:10px 6px 0;}
+.bar-chart .bar-col{flex:1; display:flex; flex-direction:column; align-items:center; justify-content:end; gap:8px; height:100%;}
+.bar-chart .bar{width:100%; max-width:52px; border-radius:8px 8px 0 0; background:linear-gradient(180deg,var(--accent),var(--primary)); transition:height 500ms ease-out;}
+.bar-chart .bar-val{font-size:11px; font-weight:700;}
+.bar-chart .bar-lbl{font-size:11px; color:var(--secondary); text-align:center;}
+.legend{display:flex; gap:16px; flex-wrap:wrap; margin-top:12px; font-size:12px; color:var(--secondary);}
+.legend-item{display:flex; align-items:center; gap:6px;}
+.legend-dot{width:10px; height:10px; border-radius:3px;}
+
+/* ===== MISC ===== */
+.divider-h{height:1px; background:var(--border); margin:18px 0;}
+.pill-toggle{display:inline-flex; background:var(--surface-2); border-radius:20px; padding:3px;}
+.pill-toggle button{border:none; background:none; padding:6px 14px; border-radius:16px; cursor:pointer; font-size:12px; font-weight:600; color:var(--secondary); min-height:32px;}
+.pill-toggle button.active{background:var(--surface); color:var(--primary); box-shadow:var(--shadow-sm);}
+.next-action{display:flex; align-items:center; gap:12px; background:var(--warning-soft); color:var(--warning); border-radius:var(--radius-sm); padding:12px 16px; margin-top:14px;}
+.next-action b{color:var(--fg);}
+.avatar-row{display:flex; align-items:center; gap:8px;}
+.text-muted{color:var(--secondary);}
+.text-sm{font-size:12px;}
+.mt-0{margin-top:0;}
+.flex-between{display:flex; align-items:center; justify-content:space-between; gap:12px;}
+.gap-8{display:flex; gap:8px;}
+.gap-8-wrap{display:flex; gap:8px; flex-wrap:wrap;}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width:1024px){
+  .sidebar{position:fixed; z-index:90; height:100vh; left:0; top:0;}
+  .app:not(.sidebar-collapsed) .sidebar{width:264px;}
+  .app.sidebar-collapsed .sidebar{width:0; border-right:none;}
+  .app{grid-template-columns:0 1fr;}
+  .app.sidebar-collapsed{grid-template-columns:0 1fr;}
+  .topbar{padding:0 14px;}
+  .kanban-col{width:230px;}
+}
+@media (max-width:768px){
+  .topbar{gap:8px;}
+  .topbar-search{display:none;}
+  .segmented button{padding:8px 9px; font-size:11.5px;}
+  .main{padding:16px 14px 50px;}
+  .user-chip .who{display:none;}
+  .kpi-value{font-size:22px;}
+  .price-row.head{display:none;}
+}
+.scrim{position:fixed; inset:0; background:rgba(2,6,23,.4); z-index:80; opacity:0; pointer-events:none; transition:opacity 200ms ease-out;}
+.scrim.show{opacity:1; pointer-events:auto;}
+@media (min-width:1025px){.scrim{display:none;}}
+.sidebar-toggle-mobile{display:none;}
+@media (max-width:1024px){.sidebar-toggle-mobile{display:flex;}}
+</style>
+</head>
+<body>
+<div class="app" id="app">
+
+  <!-- ============ SIDEBAR ============ -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-head">
+      <div class="brand-mark">ДВ</div>
+      <div class="brand-text"><b>Дверник CRM</b><span>1 Гипермаркет Дверей</span></div>
+      <button class="sidebar-toggle" id="sidebarToggle" aria-label="Свернуть меню">
+        <svg class="icon icon-sm" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5"/></svg>
+      </button>
+    </div>
+
+    <!-- NAV: КАБИНЕТ «МАГАЗИН» -->
+    <nav class="nav" data-nav="store">
+      <div class="nav-section-label">Продажи</div>
+      <div class="nav-item" data-route="store-dashboard">
+        <svg class="icon" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 12l8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75"/></svg>
+        <span class="label">Дашборд</span>
+      </div>
+      <div class="nav-item" data-route="store-leads">
+        <svg class="icon" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M15 19.128zM8.625 10.5a3.375 3.375 0 100-6.75 3.375 3.375 0 000 6.75zm7.5-3a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+        <span class="label">Лиды</span>
+      </div>
+      <div class="nav-item" data-route="store-funnel">
+        <svg class="icon" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 3c2.755 0 5.455.232 8.083.678.533.09.917.556.917 1.096v1.044a2.25 2.25 0 01-.659 1.591l-5.432 5.432a2.25 2.25 0 00-.659 1.591v2.927a2.25 2.25 0 01-1.244 2.013L9.75 21v-6.568a2.25 2.25 0 00-.659-1.591L3.659 7.409A2.25 2.25 0 013 5.818V4.774c0-.54.384-1.006.917-1.096A48.32 48.32 0 0112 3z"/></svg>
+        <span class="label">Воронка «Розница»</span>
+      </div>
+      <div class="nav-item" data-route="store-deals">
+        <svg class="icon" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M20.25 14.15v4.25c0 1.094-.787 2.036-1.872 2.18-2.087.277-4.216.42-6.378.42s-4.291-.143-6.378-.42c-1.085-.144-1.872-1.086-1.872-2.18v-4.25m16.5 0a2.18 2.18 0 00.75-1.661V8.706c0-1.081-.768-2.015-1.837-2.175a48.114 48.114 0 00-3.413-.387m4.5 8.006c-.194.165-.42.295-.673.38A23.978 23.978 0 0112 15.75c-2.648 0-5.195-.429-7.577-1.22a2.016 2.016 0 01-.673-.38m0 0A2.18 2.18 0 013 12.489V8.706c0-1.081.768-2.015 1.837-2.175a48.111 48.111 0 013.413-.387m7.5 0V5.25A2.25 2.25 0 0013.5 3h-3a2.25 2.25 0 00-2.25 2.25v.894m7.5 0a48.667 48.667 0 00-7.5 0"/></svg>
+        <span class="label">Сделки</span>
+      </div>
+      <div class="nav-item" data-route="store-contacts">
+        <svg class="icon" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19.5A2.25 2.25 0 0017.25 21h.75a2.25 2.25 0 002.25-2.25V9.75A2.25 2.25 0 0018 7.5h-.75m-13.5 12A2.25 2.25 0 016.75 21H6a2.25 2.25 0 01-2.25-2.25V9.75A2.25 2.25 0 016 7.5h.75m9 0V6a2.25 2.25 0 00-2.25-2.25h-3A2.25 2.25 0 007.5 6v1.5m9 0h-9"/></svg>
+        <span class="label">Контакты и организации</span>
+      </div>
+      <div class="nav-item" data-route="store-forms">
+        <svg class="icon" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15.666 3.888A2.25 2.25 0 0013.5 2.25h-3a2.25 2.25 0 00-2.166 1.638m7.332 0c.055.194.084.4.084.612v0a.75.75 0 01-.75.75H9a.75.75 0 01-.75-.75v0c0-.212.03-.418.084-.612m7.332 0c.646.049 1.288.11 1.927.184 1.1.128 1.907 1.077 1.907 2.185V19.5a2.25 2.25 0 01-2.25 2.25H6.75A2.25 2.25 0 014.5 19.5V6.257c0-1.108.806-2.057 1.907-2.185a48.208 48.208 0 011.927-.184"/></svg>
+        <span class="label">Бланки обслуживания</span>
+      </div>
+      <div class="nav-item" data-route="store-configurator">
+        <svg class="icon" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M10.5 6h9.75M10.5 6a1.5 1.5 0 11-3 0m3 0a1.5 1.5 0 10-3 0M3.75 6H7.5m3 12h9.75m-9.75 0a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m-3.75 0H7.5m9-6h3.75m-3.75 0a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m-9.75 0h9.75"/></svg>
+        <span class="label">Конфигуратор дверей</span>
+      </div>
+      <div class="nav-item" data-route="store-tasks">
+        <svg class="icon" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+        <span class="label">Задачи</span>
+      </div>
+      <div class="nav-section-label">Данные и деньги</div>
+      <div class="nav-item" data-route="store-integrations">
+        <svg class="icon" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99"/></svg>
+        <span class="label">Обмен и интеграции</span>
+      </div>
+      <div class="nav-item" data-route="store-reports">
+        <svg class="icon" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z"/></svg>
+        <span class="label">Отчёты и аналитика</span>
+      </div>
+      <div class="nav-item" data-route="store-billing">
+        <svg class="icon" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 8.25h19.5M2.25 9h19.5m-16.5 5.25h6m-6 2.25h3m-3.75 3h15a2.25 2.25 0 002.25-2.25V6.75A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25v10.5A2.25 2.25 0 004.5 19.5z"/></svg>
+        <span class="label">Биллинг и подписка</span>
+      </div>
+      <div class="nav-item" data-route="store-contractors">
+        <svg class="icon" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 18.75a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m3 0h6m-9 0H3.375a1.125 1.125 0 01-1.125-1.125V14.25m17.25 4.5a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m3 0h1.125c.621 0 1.129-.504 1.09-1.124a17.902 17.902 0 00-3.213-9.193 2.056 2.056 0 00-1.58-.86H14.25M16.5 18.75h-2.25m0-11.25h5.19c.317 0 .612.162.783.43l2.5 4.03H14.25M14.25 7.5v11.25m0-11.25H8.25m0 0H4.5a1.5 1.5 0 00-1.5 1.5v7.5c0 .414.336.75.75.75h.75"/></svg>
+        <span class="label">Внешние исполнители</span>
+      </div>
+      <div class="nav-item" data-route="store-settings">
+        <svg class="icon" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9.594 3.94c.09-.542.56-.94 1.11-.94h2.593c.55 0 1.02.398 1.11.94l.213 1.281c.063.374.313.686.645.87.074.04.147.083.22.127.324.196.72.257 1.075.124l1.217-.456a1.125 1.125 0 011.37.49l1.296 2.245a1.125 1.125 0 01-.26 1.431l-1.003.827c-.293.24-.438.613-.431.992a6.759 6.759 0 010 .255c-.007.378.138.75.43.99l1.005.828c.424.35.534.954.26 1.43l-1.298 2.247a1.125 1.125 0 01-1.369.491l-1.217-.456c-.355-.133-.75-.072-1.076.124a6.57 6.57 0 01-.22.128c-.331.183-.581.495-.644.869l-.213 1.28c-.09.543-.56.941-1.11.941h-2.594c-.55 0-1.02-.398-1.11-.94l-.213-1.281c-.062-.374-.312-.686-.644-.87a6.52 6.52 0 01-.22-.127c-.325-.196-.72-.257-1.076-.124l-1.217.456a1.125 1.125 0 01-1.369-.49l-1.297-2.245a1.125 1.125 0 01.26-1.431l1.004-.827c.292-.24.437-.613.43-.992a6.932 6.932 0 010-.255c.007-.378-.138-.75-.43-.99l-1.004-.828a1.125 1.125 0 01-.26-1.43l1.297-2.247a1.125 1.125 0 011.37-.491l1.216.456c.356.133.751.072 1.076-.124.072-.044.146-.087.22-.128.332-.183.582-.495.644-.869l.214-1.28zM15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+        <span class="label">Настройки</span>
+      </div>
+    </nav>
+
+    <!-- NAV: КАБИНЕТ «ПОКУПАТЕЛЬ» -->
+    <nav class="nav" data-nav="buyer" hidden>
+      <div class="nav-section-label">Мой кабинет</div>
+      <div class="nav-item" data-route="buyer-order">
+        <svg class="icon" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M20.25 14.15v4.25c0 1.094-.787 2.036-1.872 2.18-2.087.277-4.216.42-6.378.42s-4.291-.143-6.378-.42c-1.085-.144-1.872-1.086-1.872-2.18v-4.25"/></svg>
+        <span class="label">Мой заказ</span>
+      </div>
+      <div class="nav-item" data-route="buyer-docs">
+        <svg class="icon" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z"/></svg>
+        <span class="label">Документы</span>
+      </div>
+      <div class="nav-item" data-route="buyer-support">
+        <svg class="icon" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8.625 12a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H8.25m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H12m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0h-.375M21 12c0 4.556-4.03 8.25-9 8.25a9.764 9.764 0 01-2.555-.337A5.972 5.972 0 015.41 20.97a5.969 5.969 0 01-.474-.065 4.48 4.48 0 00.978-2.025c.09-.457-.133-.901-.467-1.226C3.93 16.178 3 14.189 3 12c0-4.556 4.03-8.25 9-8.25s9 3.694 9 8.25z"/></svg>
+        <span class="label">Написать менеджеру</span>
+      </div>
+    </nav>
+
+    <!-- NAV: КАБИНЕТ «ПРОИЗВОДИТЕЛЬ» -->
+    <nav class="nav" data-nav="manufacturer" hidden>
+      <div class="nav-section-label">Партнёрская сеть</div>
+      <div class="nav-item" data-route="manufacturer-orders">
+        <svg class="icon" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M20.25 14.15v4.25c0 1.094-.787 2.036-1.872 2.18-2.087.277-4.216.42-6.378.42s-4.291-.143-6.378-.42c-1.085-.144-1.872-1.086-1.872-2.18v-4.25"/></svg>
+        <span class="label">Заказы от магазинов</span>
+      </div>
+      <div class="nav-item" data-route="manufacturer-catalog">
+        <svg class="icon" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 21h19.5M4.5 3h6l-.75 4.5M4.5 3v18M10.5 7.5L21 12v9M10.5 7.5v13.5M15 12v9m-4.5-4.5h9"/></svg>
+        <span class="label">Прайс и остатки</span>
+      </div>
+      <div class="nav-item" data-route="manufacturer-docs">
+        <svg class="icon" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25"/></svg>
+        <span class="label">Документы и акты</span>
+      </div>
+    </nav>
+
+    <!-- NAV: КАБИНЕТ «ПЛАТФОРМА» -->
+    <nav class="nav" data-nav="platform" hidden>
+      <div class="nav-section-label">Управление платформой</div>
+      <div class="nav-item" data-route="platform-overview">
+        <svg class="icon" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 21v-7.5a.75.75 0 01.75-.75h3a.75.75 0 01.75.75V21M3 8.25l1.5 5.25v6a.75.75 0 00.75.75H18.75a.75.75 0 00.75-.75v-6l1.5-5.25M3 8.25h18M3 8.25L4.5 3h15L21 8.25"/></svg>
+        <span class="label">Обзор сети магазинов</span>
+      </div>
+      <div class="nav-item" data-route="platform-billing">
+        <svg class="icon" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 8.25h19.5M2.25 9h19.5m-16.5 5.25h6m-6 2.25h3m-3.75 3h15a2.25 2.25 0 002.25-2.25V6.75A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25v10.5A2.25 2.25 0 004.5 19.5z"/></svg>
+        <span class="label">Биллинг платформы</span>
+      </div>
+      <div class="nav-item" data-route="platform-integrations">
+        <svg class="icon" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M21.75 17.25v-.228a4.5 4.5 0 00-.12-1.03l-2.268-9.64a3.375 3.375 0 00-3.285-2.602H7.923a3.375 3.375 0 00-3.285 2.602l-2.268 9.64a4.5 4.5 0 00-.12 1.03v.228m19.5 0a3 3 0 01-3 3H5.25a3 3 0 01-3-3m19.5 0a3 3 0 00-3-3H5.25a3 3 0 00-3 3"/></svg>
+        <span class="label">Мониторинг интеграций</span>
+      </div>
+    </nav>
+
+    <div class="sidebar-foot">
+      <div class="nav-item" data-external-link>
+        <svg class="icon" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9.879 7.519c1.171-1.025 3.071-1.025 4.242 0 1.172 1.025 1.172 2.687 0 3.712-.203.179-.43.326-.67.442-.745.361-1.45.999-1.45 1.827v.75M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9 5.25h.008v.008H12v-.008z"/></svg>
+        <span class="label">Справка и обучение</span>
+      </div>
+    </div>
+  </aside>
+  <div class="scrim" id="scrim"></div>
+
+  <!-- ============ TOPBAR ============ -->
+  <header class="topbar">
+    <div class="segmented" role="tablist" aria-label="Переключатель кабинета" id="cabinetSwitch">
+      <button class="active" data-cabinet="store" role="tab" aria-selected="true">Магазин</button>
+      <button data-cabinet="buyer" role="tab" aria-selected="false">Покупатель</button>
+      <button data-cabinet="manufacturer" role="tab" aria-selected="false">Производитель</button>
+      <button data-cabinet="platform" role="tab" aria-selected="false">Платформа</button>
+    </div>
+    <div class="topbar-search">
+      <svg class="icon icon-sm" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z"/></svg>
+      <input type="text" id="globalSearch" placeholder="Поиск по клиентам, сделкам, телефону…" aria-label="Поиск">
+    </div>
+    <div class="topbar-right">
+      <button class="icon-btn" id="themeToggle" aria-label="Переключить тему">
+        <svg class="icon" id="themeIconSun" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 3v2.25m6.364.386-1.591 1.591M21 12h-2.25m-.386 6.364-1.591-1.591M12 18.75V21m-4.773-4.227-1.591 1.591M5.25 12H3m4.227-4.773L5.636 5.636M15.75 12a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0z"/></svg>
+      </button>
+      <button class="icon-btn" aria-label="Уведомления" id="notifBtn" style="position:relative;">
+        <svg class="icon" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M14.857 17.082a23.848 23.848 0 005.454-1.31A8.967 8.967 0 0118 9.75V9A6 6 0 006 9v.75a8.967 8.967 0 01-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 01-5.714 0m5.714 0a3 3 0 11-5.714 0"/></svg>
+      </button>
+      <button class="icon-btn sidebar-toggle-mobile" id="sidebarToggleMobile" aria-label="Открыть меню">
+        <svg class="icon" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5"/></svg>
+      </button>
+      <div class="user-chip" tabindex="0" role="button" aria-label="Профиль менеджера Ирина">
+        <div class="avatar">ИС</div>
+        <div class="who"><b>Ирина Соколова</b><span>Менеджер · Стачки, 245</span></div>
+        <svg class="icon icon-sm" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5"/></svg>
+      </div>
+    </div>
+  </header>
+
+  <!-- ============ MAIN ============ -->
+  <main class="main" id="main">
+
+  <!-- ========================================================= -->
+  <!-- 1. ДАШБОРД -->
+  <!-- ========================================================= -->
+  <section class="view" id="view-store-dashboard" data-cabinet-view="store">
+    <div class="view-head">
+      <span class="view-tag">Согласуем: общий обзор дня для менеджера и владельца</span>
+      <h1 class="view-title">Дашборд</h1>
+      <p class="view-sub">Магазин «Стачки, 245» · сегодня, 21 сентября</p>
+    </div>
+
+    <div class="grid grid-4" style="margin-bottom:20px;">
+      <div class="card kpi-card">
+        <div class="kpi-top">
+          <div class="kpi-icon"><svg class="icon" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M8.625 10.5a3.375 3.375 0 100-6.75 3.375 3.375 0 000 6.75z"/></svg></div>
+          <span class="kpi-delta up"><svg class="icon icon-sm" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 10.5L12 3m0 0l7.5 7.5M12 3v18"/></svg>+12%</span>
+        </div>
+        <div class="kpi-value num">27</div>
+        <div class="kpi-label">Лиды сегодня</div>
+      </div>
+      <div class="card kpi-card">
+        <div class="kpi-top">
+          <div class="kpi-icon"><svg class="icon" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M20.25 14.15v4.25c0 1.094-.787 2.036-1.872 2.18-2.087.277-4.216.42-6.378.42s-4.291-.143-6.378-.42c-1.085-.144-1.872-1.086-1.872-2.18v-4.25"/></svg></div>
+          <span class="kpi-delta up num">+5</span>
+        </div>
+        <div class="kpi-value num">143</div>
+        <div class="kpi-label">Сделки в работе</div>
+      </div>
+      <div class="card kpi-card">
+        <div class="kpi-top">
+          <div class="kpi-icon"><svg class="icon" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 8.25h19.5M2.25 9h19.5m-16.5 5.25h6"/></svg></div>
+          <span class="kpi-delta up">+8%</span>
+        </div>
+        <div class="kpi-value num">4,2 млн ₽</div>
+        <div class="kpi-label">Выручка за месяц</div>
+      </div>
+      <div class="card kpi-card">
+        <div class="kpi-top">
+          <div class="kpi-icon"><svg class="icon" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 3c2.755 0 5.455.232 8.083.678M12 3v18"/></svg></div>
+          <span class="kpi-delta down">-2%</span>
+        </div>
+        <div class="kpi-value num">34%</div>
+        <div class="kpi-label">Конверсия в продажу</div>
+      </div>
+    </div>
+
+    <div class="grid grid-2" style="align-items:start;">
+      <div class="card card-pad">
+        <div class="card-head"><h3>Мини-воронка «Розница»</h3><a href="#/store/funnel" class="text-sm">Открыть воронку →</a></div>
+        <div class="mini-funnel">
+          <div class="mf-row"><div class="mf-label">Встреча</div><div class="mf-bar-track"><div class="mf-bar-fill" style="width:100%"></div></div><div class="mf-value num">210</div></div>
+          <div class="mf-row"><div class="mf-label">Замер</div><div class="mf-bar-track"><div class="mf-bar-fill" style="width:80%"></div></div><div class="mf-value num">168</div></div>
+          <div class="mf-row"><div class="mf-label">Оплата</div><div class="mf-bar-track"><div class="mf-bar-fill" style="width:58%"></div></div><div class="mf-value num">122</div></div>
+          <div class="mf-row"><div class="mf-label">Установка</div><div class="mf-bar-track"><div class="mf-bar-fill" style="width:46%"></div></div><div class="mf-value num">96</div></div>
+          <div class="mf-row"><div class="mf-label">Выполнено</div><div class="mf-bar-track"><div class="mf-bar-fill" style="width:38%"></div></div><div class="mf-value num">81</div></div>
+        </div>
+      </div>
+
+      <div class="card card-pad">
+        <div class="card-head"><h3>Задачи на сегодня</h3><span class="badge badge-warning">6 активных</span></div>
+        <div class="list">
+          <div class="list-item">
+            <div class="list-check checked" role="checkbox" aria-checked="true" tabindex="0" aria-label="Отметить выполненной"><svg viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg></div>
+            <div class="list-main"><div class="list-title" style="text-decoration:line-through;color:var(--secondary)">Позвонить Синицыну — уточнить замер</div><div class="list-sub">Выполнено в 09:14</div></div>
+          </div>
+          <div class="list-item">
+            <div class="list-check" role="checkbox" aria-checked="false" tabindex="0" aria-label="Отметить выполненной"></div>
+            <div class="list-main"><div class="list-title">Позвонить по замеру — Крылов Д.</div><div class="list-sub">Сделка №4128 · до 18:00 сегодня</div></div>
+            <span class="badge badge-danger">Срочно</span>
+          </div>
+          <div class="list-item">
+            <div class="list-check" role="checkbox" aria-checked="false" tabindex="0" aria-label="Отметить выполненной"></div>
+            <div class="list-main"><div class="list-title">Отправить КП по МК — Ефимова Н.</div><div class="list-sub">Сделка №4131 · сегодня, 16:00</div></div>
+          </div>
+          <div class="list-item">
+            <div class="list-check" role="checkbox" aria-checked="false" tabindex="0" aria-label="Отметить выполненной"></div>
+            <div class="list-main"><div class="list-title">Подтвердить доставку — ООО «СтройГрад»</div><div class="list-sub">Сделка №4098 · завтра, 10:00</div></div>
+          </div>
+          <div class="list-item">
+            <div class="list-check" role="checkbox" aria-checked="false" tabindex="0" aria-label="Отметить выполненной"></div>
+            <div class="list-main"><div class="list-title">Запросить отзыв — Гуляев С.</div><div class="list-sub">Сделка №4076 · установка завершена</div></div>
+          </div>
+          <div class="list-item">
+            <div class="list-check" role="checkbox" aria-checked="false" tabindex="0" aria-label="Отметить выполненной"></div>
+            <div class="list-main"><div class="list-title">Согласовать скидку — Тарасов И.</div><div class="list-sub">Сделка №4140 · ждёт решения РОП</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card card-pad" style="margin-top:20px;">
+      <div class="card-head"><h3>Последние лиды</h3><a href="#/store/leads" class="text-sm">Все лиды →</a></div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Источник</th><th>Имя</th><th>Телефон</th><th>Интересует</th><th>Время</th><th>Статус</th></tr></thead>
+          <tbody>
+            <tr onclick="openDeal()"><td><span class="badge badge-site badge-dot">Сайт</span></td><td class="cell-strong">Виктор Синицын</td><td class="num">+7 918 400-11-22</td><td>Входная дверь, Гефест Термо</td><td class="cell-muted">10:42</td><td><span class="badge badge-accent">Новый</span></td></tr>
+            <tr onclick="openDeal()"><td><span class="badge badge-tg badge-dot">Telegram</span></td><td class="cell-strong">Ольга Матвеева</td><td class="num">+7 928 511-22-33</td><td>МК, скрытые двери</td><td class="cell-muted">10:15</td><td><span class="badge badge-warning">В работе</span></td></tr>
+            <tr onclick="openDeal()"><td><span class="badge badge-call badge-dot">Звонок</span></td><td class="cell-strong">Дмитрий Крылов</td><td class="num">+7 900 233-44-55</td><td>Замер, входная</td><td class="cell-muted">09:58</td><td><span class="badge badge-warning">В работе</span></td></tr>
+            <tr onclick="openDeal()"><td><span class="badge badge-avito badge-dot">Avito</span></td><td class="cell-strong">Наталья Ефимова</td><td class="num">+7 951 622-33-44</td><td>Межкомнатные, 5 шт</td><td class="cell-muted">09:30</td><td><span class="badge badge-accent">Новый</span></td></tr>
+            <tr onclick="openDeal()"><td><span class="badge badge-whatsapp badge-dot">WhatsApp</span></td><td class="cell-strong">Сергей Гуляев</td><td class="num">+7 908 744-55-66</td><td>Повторная покупка</td><td class="cell-muted">09:02</td><td><span class="badge badge-accent">Новый</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========================================================= -->
+  <!-- 2. ЛИДЫ -->
+  <!-- ========================================================= -->
+  <section class="view" id="view-store-leads" data-cabinet-view="store" hidden>
+    <div class="view-head">
+      <span class="view-tag">Согласуем: как выглядит единая лента входящих обращений из всех каналов</span>
+      <h1 class="view-title">Лиды</h1>
+      <p class="view-sub">Приходят из сайта, лид-бота, Telegram, Avito и WhatsApp — далее вручную или автоматически превращаются в сделку</p>
+    </div>
+
+    <div class="card card-pad" style="margin-bottom:16px;">
+      <div class="gap-8-wrap">
+        <span class="choice checked">Все каналы</span>
+        <span class="choice"><span class="badge badge-site badge-dot" style="background:none;padding:0"></span>Сайт</span>
+        <span class="choice">Звонок</span>
+        <span class="choice">Telegram</span>
+        <span class="choice">Avito</span>
+        <span class="choice">WhatsApp</span>
+        <span style="margin-left:auto" class="btn btn-sm"><svg class="icon icon-sm" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 3v2.25m0 13.5V21m8.25-9H18M6 12H3.75m15.02-6.02L17.16 7.6M6.84 17.16l-1.61 1.61m0-13.54L6.84 6.84m10.32 10.32l1.61 1.61"/></svg>Фильтры</span>
+      </div>
+    </div>
+
+    <div class="table-wrap card">
+      <table>
+        <thead>
+          <tr><th>Источник</th><th>Имя</th><th>Телефон</th><th>Что интересует</th><th>Время</th><th>Статус</th><th>Действия</th></tr>
+        </thead>
+        <tbody id="leadsTable">
+          <tr><td><span class="badge badge-site badge-dot">Сайт</span></td><td class="cell-strong">Виктор Синицын</td><td class="num">+7 918 400-11-22</td><td>Входная дверь «Гефест Термо»</td><td class="cell-muted">10:42</td><td><span class="badge badge-accent">Новый</span></td>
+            <td><div class="gap-8"><button class="btn btn-sm">Взять</button><button class="btn btn-sm btn-accent" onclick="event.stopPropagation();openDeal();">→ В сделку</button></div></td></tr>
+          <tr><td><span class="badge badge-tg badge-dot">Telegram</span></td><td class="cell-strong">Ольга Матвеева</td><td class="num">+7 928 511-22-33</td><td>МК, скрытые двери, 4 шт</td><td class="cell-muted">10:15</td><td><span class="badge badge-warning">В работе</span></td>
+            <td><div class="gap-8"><button class="btn btn-sm" disabled>Взято: Ирина С.</button><button class="btn btn-sm btn-accent" onclick="event.stopPropagation();openDeal();">→ В сделку</button></div></td></tr>
+          <tr><td><span class="badge badge-call badge-dot">Звонок</span></td><td class="cell-strong">Дмитрий Крылов</td><td class="num">+7 900 233-44-55</td><td>Замер, входная дверь</td><td class="cell-muted">09:58</td><td><span class="badge badge-warning">В работе</span></td>
+            <td><div class="gap-8"><button class="btn btn-sm" disabled>Взято: Максим П.</button><button class="btn btn-sm btn-accent" onclick="event.stopPropagation();openDeal();">→ В сделку</button></div></td></tr>
+          <tr><td><span class="badge badge-avito badge-dot">Avito</span></td><td class="cell-strong">Наталья Ефимова</td><td class="num">+7 951 622-33-44</td><td>Межкомнатные двери, 5 шт</td><td class="cell-muted">09:30</td><td><span class="badge badge-accent">Новый</span></td>
+            <td><div class="gap-8"><button class="btn btn-sm">Взять</button><button class="btn btn-sm btn-accent" onclick="event.stopPropagation();openDeal();">→ В сделку</button></div></td></tr>
+          <tr><td><span class="badge badge-whatsapp badge-dot">WhatsApp</span></td><td class="cell-strong">Сергей Гуляев</td><td class="num">+7 908 744-55-66</td><td>Повторная покупка — МК на кухню</td><td class="cell-muted">09:02</td><td><span class="badge badge-accent">Новый</span></td>
+            <td><div class="gap-8"><button class="btn btn-sm">Взять</button><button class="btn btn-sm btn-accent" onclick="event.stopPropagation();openDeal();">→ В сделку</button></div></td></tr>
+          <tr><td><span class="badge badge-site badge-dot">Сайт</span></td><td class="cell-strong">Анна Ковалёва</td><td class="num">+7 961 300-77-88</td><td>Конфигуратор — входная «Океан Роялти»</td><td class="cell-muted">08:47</td><td><span class="badge badge-warning">В работе</span></td>
+            <td><div class="gap-8"><button class="btn btn-sm" disabled>Взято: Елена Д.</button><button class="btn btn-sm btn-accent" onclick="event.stopPropagation();openDeal();">→ В сделку</button></div></td></tr>
+          <tr><td><span class="badge badge-tg badge-dot">Telegram</span></td><td class="cell-strong">Павел Жуков</td><td class="num">+7 903 555-99-11</td><td>Уточнение по акции −15%</td><td class="cell-muted">08:20</td><td><span class="badge badge-accent">Новый</span></td>
+            <td><div class="gap-8"><button class="btn btn-sm">Взять</button><button class="btn btn-sm btn-accent" onclick="event.stopPropagation();openDeal();">→ В сделку</button></div></td></tr>
+          <tr><td><span class="badge badge-call badge-dot">Звонок</span></td><td class="cell-strong">Марина Соловьёва</td><td class="num">+7 918 222-66-77</td><td>Входная дверь, бюджет до 35 000</td><td class="cell-muted">Вчера, 18:41</td><td><span class="badge badge-neutral">Обработан</span></td>
+            <td><div class="gap-8"><button class="btn btn-sm btn-ghost" disabled>Закрыт</button></div></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- ========================================================= -->
+  <!-- 3. ВОРОНКА «РОЗНИЦА» — КАНБАН -->
+  <!-- ========================================================= -->
+  <section class="view" id="view-store-funnel" data-cabinet-view="store" hidden>
+    <div class="view-head">
+      <span class="view-tag">Согласуем: полный путь розничной сделки от встречи до получения оплаты</span>
+      <h1 class="view-title">Воронка «Розница»</h1>
+      <p class="view-sub">Клик по «⋮» на карточке — сменить стадию. Клик по карточке — открыть сделку</p>
+    </div>
+
+    <div class="kanban-scroll">
+      <div class="kanban" id="kanbanBoard">
+
+        <div class="kanban-col" data-stage="Встреча">
+          <div class="kanban-col-head"><b>Встреча</b><span class="kanban-count">18</span></div>
+          <div class="kanban-cards">
+            <div class="kanban-card" onclick="openDeal()">
+              <div class="kc-top"><span class="kc-client">Виктор Синицын</span><button class="kc-menu-btn" onclick="toggleStageMenu(event,this)" aria-label="Сменить стадию"><svg class="icon icon-sm" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6.75a.75.75 0 110-1.5.75.75 0 010 1.5zm0 6a.75.75 0 110-1.5.75.75 0 010 1.5zm0 6a.75.75 0 110-1.5.75.75 0 010 1.5z"/></svg></button></div>
+              <div class="kc-sum num">42 000 ₽</div>
+              <div class="kc-meta"><span class="kc-due"><svg class="icon icon-sm" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>сегодня 15:00</span><span class="kc-avatar">ИС</span></div>
+            </div>
+            <div class="kanban-card" onclick="openDeal()">
+              <div class="kc-top"><span class="kc-client">Анна Ковалёва</span><button class="kc-menu-btn" onclick="toggleStageMenu(event,this)" aria-label="Сменить стадию"><svg class="icon icon-sm" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6.75a.75.75 0 110-1.5.75.75 0 010 1.5zm0 6a.75.75 0 110-1.5.75.75 0 010 1.5zm0 6a.75.75 0 110-1.5.75.75 0 010 1.5z"/></svg></button></div>
+              <div class="kc-sum num">67 500 ₽</div>
+              <div class="kc-meta"><span class="kc-due urgent"><svg class="icon icon-sm" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>завтра 10:00</span><span class="kc-avatar">ЕД</span></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="kanban-col" data-stage="Замер">
+          <div class="kanban-col-head"><b>Замер</b><span class="kanban-count">14</span></div>
+          <div class="kanban-cards">
+            <div class="kanban-card" onclick="openDeal()">
+              <div class="kc-top"><span class="kc-client">Дмитрий Крылов</span><button class="kc-menu-btn" onclick="toggleStageMenu(event,this)" aria-label="Сменить стадию"><svg class="icon icon-sm" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6.75a.75.75 0 110-1.5.75.75 0 010 1.5zm0 6a.75.75 0 110-1.5.75.75 0 010 1.5zm0 6a.75.75 0 110-1.5.75.75 0 010 1.5z"/></svg></button></div>
+              <div class="kc-sum num">54 200 ₽</div>
+              <div class="kc-meta"><span class="kc-due urgent"><svg class="icon icon-sm" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>до 18:00</span><span class="kc-avatar">МП</span></div>
+            </div>
+            <div class="kanban-card" onclick="openDeal()">
+              <div class="kc-top"><span class="kc-client">ООО «Дон-Интерьер»</span><button class="kc-menu-btn" onclick="toggleStageMenu(event,this)" aria-label="Сменить стадию"><svg class="icon icon-sm" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6.75a.75.75 0 110-1.5.75.75 0 010 1.5zm0 6a.75.75 0 110-1.5.75.75 0 010 1.5zm0 6a.75.75 0 110-1.5.75.75 0 010 1.5z"/></svg></button></div>
+              <div class="kc-sum num">312 000 ₽</div>
+              <div class="kc-meta"><span class="kc-due">23.09 12:00</span><span class="kc-avatar">АВ</span></div>
+            </div>
+            <div class="kanban-card" onclick="openDeal()">
+              <div class="kc-top"><span class="kc-client">Игорь Тарасов</span><button class="kc-menu-btn" onclick="toggleStageMenu(event,this)" aria-label="Сменить стадию"><svg class="icon icon-sm" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6.75a.75.75 0 110-1.5.75.75 0 010 1.5zm0 6a.75.75 0 110-1.5.75.75 0 010 1.5zm0 6a.75.75 0 110-1.5.75.75 0 010 1.5z"/></svg></button></div>
+              <div class="kc-sum num">38 900 ₽</div>
+              <div class="kc-meta"><span class="kc-due">24.09 09:30</span><span class="kc-avatar">ИС</span></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="kanban-col" data-stage="Повторная встреча">
+          <div class="kanban-col-head"><b>Повторная встреча</b><span class="kanban-count">9</span></div>
+          <div class="kanban-cards">
+            <div class="kanban-card" onclick="openDeal()">
+              <div class="kc-top"><span class="kc-client">Екатерина Быкова</span><button class="kc-menu-btn" onclick="toggleStageMenu(event,this)" aria-label="Сменить стадию"><svg class="icon icon-sm" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6.75a.75.75 0 110-1.5.75.75 0 010 1.5zm0 6a.75.75 0 110-1.5.75.75 0 010 1.5zm0 6a.75.75 0 110-1.5.75.75 0 010 1.5z"/></svg></button></div>
+              <div class="kc-sum num">71 300 ₽</div>
+              <div class="kc-meta"><span class="kc-due">25.09 11:00</span><span class="kc-avatar">СН</span></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="kanban-col" data-stage="Оплата/подписание">
+          <div class="kanban-col-head"><b>Оплата / подписание</b><span class="kanban-count">21</span></div>
+          <div class="kanban-cards">
+            <div class="kanban-card" onclick="openDeal()">
+              <div class="kc-top"><span class="kc-client">Наталья Ефимова</span><button class="kc-menu-btn" onclick="toggleStageMenu(event,this)" aria-label="Сменить стадию"><svg class="icon icon-sm" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6.75a.75.75 0 110-1.5.75.75 0 010 1.5zm0 6a.75.75 0 110-1.5.75.75 0 010 1.5zm0 6a.75.75 0 110-1.5.75.75 0 010 1.5z"/></svg></button></div>
+              <div class="kc-sum num">96 400 ₽</div>
+              <div class="kc-meta"><span class="badge badge-warning" style="font-size:10.5px">Аванс внесён</span><span class="kc-avatar">ИС</span></div>
+            </div>
+            <div class="kanban-card" onclick="openDeal()">
+              <div class="kc-top"><span class="kc-client">ИП Логинов</span><button class="kc-menu-btn" onclick="toggleStageMenu(event,this)" aria-label="Сменить стадию"><svg class="icon icon-sm" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6.75a.75.75 0 110-1.5.75.75 0 010 1.5zm0 6a.75.75 0 110-1.5.75.75 0 010 1.5zm0 6a.75.75 0 110-1.5.75.75 0 010 1.5z"/></svg></button></div>
+              <div class="kc-sum num">184 000 ₽</div>
+              <div class="kc-meta"><span class="badge badge-danger" style="font-size:10.5px">Долг 40 000</span><span class="kc-avatar">МП</span></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="kanban-col" data-stage="Заказной товар">
+          <div class="kanban-col-head"><b>Заказной товар</b><span class="kanban-count">27</span></div>
+          <div class="kanban-cards">
+            <div class="kanban-card" onclick="openDeal()">
+              <div class="kc-top"><span class="kc-client">Павел Жуков</span><button class="kc-menu-btn" onclick="toggleStageMenu(event,this)" aria-label="Сменить стадию"><svg class="icon icon-sm" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6.75a.75.75 0 110-1.5.75.75 0 010 1.5zm0 6a.75.75 0 110-1.5.75.75 0 010 1.5zm0 6a.75.75 0 110-1.5.75.75 0 010 1.5z"/></svg></button></div>
+              <div class="kc-sum num">58 700 ₽</div>
+              <div class="kc-meta"><span class="kc-due">Поставка 30.09</span><span class="kc-avatar">ЕД</span></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="kanban-col" data-stage="Доставка">
+          <div class="kanban-col-head"><b>Доставка</b><span class="kanban-count">11</span></div>
+          <div class="kanban-cards">
+            <div class="kanban-card" onclick="openDeal()">
+              <div class="kc-top"><span class="kc-client">ООО «СтройГрад»</span><button class="kc-menu-btn" onclick="toggleStageMenu(event,this)" aria-label="Сменить стадию"><svg class="icon icon-sm" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6.75a.75.75 0 110-1.5.75.75 0 010 1.5zm0 6a.75.75 0 110-1.5.75.75 0 010 1.5zm0 6a.75.75 0 110-1.5.75.75 0 010 1.5z"/></svg></button></div>
+              <div class="kc-sum num">421 000 ₽</div>
+              <div class="kc-meta"><span class="kc-due">завтра 10:00</span><span class="kc-avatar">АВ</span></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="kanban-col" data-stage="Установка">
+          <div class="kanban-col-head"><b>Установка</b><span class="kanban-count">16</span></div>
+          <div class="kanban-cards">
+            <div class="kanban-card" onclick="openDeal()">
+              <div class="kc-top"><span class="kc-client">Марина Соловьёва</span><button class="kc-menu-btn" onclick="toggleStageMenu(event,this)" aria-label="Сменить стадию"><svg class="icon icon-sm" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6.75a.75.75 0 110-1.5.75.75 0 010 1.5zm0 6a.75.75 0 110-1.5.75.75 0 010 1.5zm0 6a.75.75 0 110-1.5.75.75 0 010 1.5z"/></svg></button></div>
+              <div class="kc-sum num">33 200 ₽</div>
+              <div class="kc-meta"><span class="kc-due">Бригада №2</span><span class="kc-avatar">СН</span></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="kanban-col" data-stage="Обратная связь">
+          <div class="kanban-col-head"><b>Обратная связь</b><span class="kanban-count">8</span></div>
+          <div class="kanban-cards">
+            <div class="kanban-card" onclick="openDeal()">
+              <div class="kc-top"><span class="kc-client">Сергей Гуляев</span><button class="kc-menu-btn" onclick="toggleStageMenu(event,this)" aria-label="Сменить стадию"><svg class="icon icon-sm" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6.75a.75.75 0 110-1.5.75.75 0 010 1.5zm0 6a.75.75 0 110-1.5.75.75 0 010 1.5zm0 6a.75.75 0 110-1.5.75.75 0 010 1.5z"/></svg></button></div>
+              <div class="kc-sum num">61 000 ₽</div>
+              <div class="kc-meta"><span class="kc-due">Отзыв запрошен</span><span class="kc-avatar">ИС</span></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="kanban-col" data-stage="Оплата получена">
+          <div class="kanban-col-head"><b>Оплата получена</b><span class="kanban-count">19</span></div>
+          <div class="kanban-cards">
+            <div class="kanban-card" onclick="openDeal()">
+              <div class="kc-top"><span class="kc-client">Елена Дорохова (клиент)</span><button class="kc-menu-btn" onclick="toggleStageMenu(event,this)" aria-label="Сменить стадию"><svg class="icon icon-sm" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6.75a.75.75 0 110-1.5.75.75 0 010 1.5zm0 6a.75.75 0 110-1.5.75.75 0 010 1.5zm0 6a.75.75 0 110-1.5.75.75 0 010 1.5z"/></svg></button></div>
+              <div class="kc-sum num">48 500 ₽</div>
+              <div class="kc-meta"><span class="badge badge-success" style="font-size:10.5px">Закрыта</span><span class="kc-avatar">МП</span></div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <div class="funnel-flags">
+      <div class="flag-card"><span class="badge badge-danger">7</span><span>Причина отказа</span></div>
+      <div class="flag-card"><span class="badge badge-neutral">4</span><span>Ответ не получен</span></div>
+    </div>
+  </section>
+
+  <!-- ========================================================= -->
+  <!-- 4. СДЕЛКИ -->
+  <!-- ========================================================= -->
+  <section class="view" id="view-store-deals" data-cabinet-view="store" hidden>
+    <div class="view-head">
+      <span class="view-tag">Согласуем: единый реестр всех сделок магазина с фильтром и сортировкой</span>
+      <h1 class="view-title">Сделки</h1>
+      <p class="view-sub">143 сделки в работе · клик по строке открывает карточку сделки</p>
+    </div>
+
+    <div class="card card-pad" style="margin-bottom:16px;">
+      <div class="gap-8-wrap">
+        <span class="choice checked">Все стадии</span>
+        <span class="choice">Мои</span>
+        <span class="choice">Просрочено</span>
+        <span class="choice">С долгом</span>
+        <span style="margin-left:auto" class="btn btn-sm"><svg class="icon icon-sm" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 4.5h18M6 9h12M9 13.5h6M11 18h2"/></svg>Сортировка</span>
+      </div>
+    </div>
+
+    <div class="table-wrap card">
+      <table>
+        <thead>
+          <tr>
+            <th class="sortable"><span class="th-flex">Клиент <svg class="icon icon-sm" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 15L12 18.75 15.75 15m-7.5-6L12 5.25 15.75 9"/></svg></span></th>
+            <th>Объект</th>
+            <th class="sortable"><span class="th-flex">Сумма <svg class="icon icon-sm" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 15L12 18.75 15.75 15m-7.5-6L12 5.25 15.75 9"/></svg></span></th>
+            <th>Стадия</th>
+            <th>Ответственный</th>
+            <th class="sortable"><span class="th-flex">Обновлено <svg class="icon icon-sm" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 15L12 18.75 15.75 15m-7.5-6L12 5.25 15.75 9"/></svg></span></th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr onclick="openDeal()"><td class="cell-strong">Виктор Синицын<div class="cell-muted">№4152</div></td><td>кв. Стачки 245-12</td><td class="num cell-strong">42 000 ₽</td><td><span class="badge badge-accent">Встреча</span></td><td>Ирина С.</td><td class="cell-muted">сегодня 10:42</td></tr>
+          <tr onclick="openDeal()"><td class="cell-strong">Дмитрий Крылов<div class="cell-muted">№4128</div></td><td>кв. Ленина 88-4</td><td class="num cell-strong">54 200 ₽</td><td><span class="badge badge-warning">Замер</span></td><td>Максим П.</td><td class="cell-muted">сегодня 09:58</td></tr>
+          <tr onclick="openDeal()"><td class="cell-strong">ООО «Дон-Интерьер»<div class="cell-muted">№4119</div></td><td>офис БЦ «Максимум»</td><td class="num cell-strong">312 000 ₽</td><td><span class="badge badge-warning">Замер</span></td><td>Артём В.</td><td class="cell-muted">вчера 17:20</td></tr>
+          <tr onclick="openDeal()"><td class="cell-strong">Наталья Ефимова<div class="cell-muted">№4131</div></td><td>кв. Проспект Стачки 30-70</td><td class="num cell-strong">96 400 ₽</td><td><span class="badge badge-accent">Оплата/подписание</span></td><td>Ирина С.</td><td class="cell-muted">сегодня 08:12</td></tr>
+          <tr onclick="openDeal()"><td class="cell-strong">ИП Логинов<div class="cell-muted">№4098</div></td><td>магазин, ТЦ «Горизонт»</td><td class="num cell-strong">184 000 ₽</td><td><span class="badge badge-danger">Долг 40 000 ₽</span></td><td>Максим П.</td><td class="cell-muted">вчера 15:05</td></tr>
+          <tr onclick="openDeal()"><td class="cell-strong">ООО «СтройГрад»<div class="cell-muted">№4076</div></td><td>жилой комплекс, 6 кв.</td><td class="num cell-strong">421 000 ₽</td><td><span class="badge badge-neutral">Доставка</span></td><td>Артём В.</td><td class="cell-muted">21.09 07:40</td></tr>
+          <tr onclick="openDeal()"><td class="cell-strong">Марина Соловьёва<div class="cell-muted">№4061</div></td><td>кв. Королёва 12-51</td><td class="num cell-strong">33 200 ₽</td><td><span class="badge badge-neutral">Установка</span></td><td>Светлана Н.</td><td class="cell-muted">20.09 19:30</td></tr>
+          <tr onclick="openDeal()"><td class="cell-strong">Сергей Гуляев<div class="cell-muted">№4040</div></td><td>кв. Textильщиков 5-9</td><td class="num cell-strong">61 000 ₽</td><td><span class="badge badge-success">Обратная связь</span></td><td>Ирина С.</td><td class="cell-muted">19.09 11:12</td></tr>
+          <tr onclick="openDeal()"><td class="cell-strong">Игорь Тарасов<div class="cell-muted">№4140</div></td><td>кв. Малиновского 7-102</td><td class="num cell-strong">38 900 ₽</td><td><span class="badge badge-accent">Замер</span></td><td>Ирина С.</td><td class="cell-muted">сегодня 08:00</td></tr>
+          <tr onclick="openDeal()"><td class="cell-strong">Екатерина Быкова<div class="cell-muted">№4104</div></td><td>кв. Стачки 200-15</td><td class="num cell-strong">71 300 ₽</td><td><span class="badge badge-warning">Повторная встреча</span></td><td>Светлана Н.</td><td class="cell-muted">вчера 14:47</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- ========================================================= -->
+  <!-- 5. КАРТОЧКА СДЕЛКИ (панель поверх контента) -->
+  <!-- ========================================================= -->
+  <div class="overlay" id="dealOverlay" aria-hidden="true">
+    <div class="panel" role="dialog" aria-modal="true" aria-labelledby="dealClientName">
+      <div class="panel-head">
+        <div style="min-width:0;">
+          <span class="view-tag">Согласуем: главный экран сделки — деньги / исполнение / качество в одном месте</span>
+          <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+            <h2 id="dealClientName" style="font-size:19px;">Дмитрий Крылов</h2>
+            <div class="pill-toggle">
+              <button class="active" type="button">Контакт</button>
+              <button type="button">Организация</button>
+            </div>
+            <span class="badge badge-neutral">Сделка №4128</span>
+          </div>
+          <p class="text-sm text-muted" style="margin-top:4px;">Ответственный: <b>Максим Петров</b> · кв. Стачки 245, кв. 12</p>
+        </div>
+        <button class="panel-close" onclick="closeDeal()" aria-label="Закрыть карточку сделки">
+          <svg class="icon" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+        </button>
+      </div>
+
+      <div class="panel-body">
+
+        <div class="next-action">
+          <svg class="icon" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m0 3.75h.008v.008H12v-.008zM21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+          <div>Ближайшее действие: <b>Позвонить по замеру</b> — до 18:00 сегодня</div>
+          <button class="btn btn-sm btn-primary" style="margin-left:auto;">Выполнить</button>
+        </div>
+
+        <!-- ТРЕК ДЕНЬГИ -->
+        <div class="track" style="margin-top:22px;">
+          <div class="track-head">
+            <span class="track-name"><svg class="icon icon-sm" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v12m-3-2.818l.879.659c1.171.879 3.07.879 4.242 0 1.172-.879 1.172-2.303 0-3.182C13.536 12.219 12.768 12 12 12c-.725 0-1.45-.22-2.003-.659-1.106-.879-1.106-2.303 0-3.182s2.9-.879 4.006 0l.415.33M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>Деньги</span>
+            <span class="badge badge-warning track-flag"><svg class="icon icon-sm" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z"/></svg>Есть долг: 40 000 ₽</span>
+          </div>
+          <div class="stepper">
+            <div class="step done"><div class="dot">✓</div><div class="line"></div><div class="lbl">Аванс</div></div>
+            <div class="step current"><div class="dot">2</div><div class="line"></div><div class="lbl">Частично оплачено</div></div>
+            <div class="step"><div class="dot">3</div><div class="lbl">Оплачено полностью</div></div>
+          </div>
+        </div>
+
+        <!-- ТРЕК ИСПОЛНЕНИЕ -->
+        <div class="track">
+          <div class="track-head">
+            <span class="track-name"><svg class="icon icon-sm" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M11.42 15.17L17.25 21A2.652 2.652 0 0021 17.25l-5.877-5.877M11.42 15.17l2.496-3.03c.317-.384.74-.626 1.208-.766M11.42 15.17l-4.655 5.653a2.548 2.548 0 11-3.586-3.586l6.837-5.63m5.108-.233c.55-.164 1.163-.188 1.743-.14a4.5 4.5 0 004.486-6.336l-3.276 3.277a3.004 3.004 0 01-2.25-2.25l3.276-3.276a4.5 4.5 0 00-6.336 4.486c.091 1.076-.071 2.264-.904 2.95l-.102.085m-1.745 1.437L5.909 7.5H4.5L2.25 3.75l1.5-1.5L7.5 4.5v1.409l4.26 4.26m-1.745 1.437l1.745-1.437m6.615 8.206L15.75 15.75M4.867 19.125h.008v.008h-.008v-.008z"/></svg>Исполнение</span>
+          </div>
+          <div class="stepper">
+            <div class="step done"><div class="dot">✓</div><div class="line"></div><div class="lbl">В работе</div></div>
+            <div class="step current"><div class="dot">2</div><div class="line"></div><div class="lbl">Поставка</div></div>
+            <div class="step"><div class="dot">3</div><div class="line"></div><div class="lbl">Готово к монтажу</div></div>
+            <div class="step"><div class="dot">4</div><div class="line"></div><div class="lbl">Установлено</div></div>
+            <div class="step"><div class="dot">5</div><div class="lbl">Принято</div></div>
+          </div>
+        </div>
+
+        <!-- ТРЕК КАЧЕСТВО -->
+        <div class="track">
+          <div class="track-head">
+            <span class="track-name"><svg class="icon icon-sm" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M11.48 3.499a.562.562 0 011.04 0l2.125 5.111a.563.563 0 00.475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 00-.182.557l1.285 5.385a.562.562 0 01-.84.61l-4.725-2.885a.563.563 0 00-.586 0L6.982 20.54a.562.562 0 01-.84-.61l1.285-5.386a.562.562 0 00-.182-.557l-4.204-3.602a.563.563 0 01.321-.988l5.518-.442a.563.563 0 00.475-.345L11.48 3.5z"/></svg>Качество</span>
+          </div>
+          <div class="stepper">
+            <div class="step done"><div class="dot">✓</div><div class="line"></div><div class="lbl">Отзыв запрошен</div></div>
+            <div class="step"><div class="dot">2</div><div class="lbl">Оценка получена</div></div>
+          </div>
+        </div>
+
+        <div class="divider-h"></div>
+
+        <!-- ОБЪЕКТ -->
+        <div class="card-head"><h3>Объект покупателя</h3><span class="text-sm text-muted">Квартира, ул. Стачки 245, кв. 12</span></div>
+
+        <div class="accordion-item open">
+          <div class="accordion-head" onclick="this.parentElement.classList.toggle('open')">
+            <b>Входная дверь</b>
+            <svg class="icon icon-sm chev" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5"/></svg>
+          </div>
+          <div class="accordion-body">
+            <p class="text-sm text-muted" style="margin-bottom:8px;">Гефест «Термо» · терморазрыв, замок сувальдный + цилиндровый</p>
+            <div class="price-row head"><span>Позиция</span><span class="price-cell">База РРЦ</span><span class="price-cell">Продажная</span><span class="price-cell">Клиенту</span><span class="price-cell">Закупочная</span></div>
+            <div class="price-row">
+              <span class="price-cell name">Гефест «Термо» 960×2050</span>
+              <span class="price-cell num">48 000 ₽</span>
+              <span class="price-cell num">45 000 ₽</span>
+              <span class="price-cell num">42 000 ₽</span>
+              <span class="price-cell num"><span class="tip lock"><svg class="icon icon-sm" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z"/></svg><span class="tip-bubble">Видят не все роли</span></span>27 400 ₽</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="accordion-item">
+          <div class="accordion-head" onclick="this.parentElement.classList.toggle('open')">
+            <b>Спальня</b>
+            <svg class="icon icon-sm chev" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5"/></svg>
+          </div>
+          <div class="accordion-body">
+            <p class="text-sm text-muted" style="margin-bottom:8px;">Океан «Роялти» · глухая, эмаль, скрытые петли</p>
+            <div class="price-row head"><span>Позиция</span><span class="price-cell">База РРЦ</span><span class="price-cell">Продажная</span><span class="price-cell">Клиенту</span><span class="price-cell">Закупочная</span></div>
+            <div class="price-row">
+              <span class="price-cell name">Океан «Роялти» 800×2000</span>
+              <span class="price-cell num">19 500 ₽</span>
+              <span class="price-cell num">18 000 ₽</span>
+              <span class="price-cell num">17 000 ₽</span>
+              <span class="price-cell num"><span class="tip lock"><svg class="icon icon-sm" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z"/></svg><span class="tip-bubble">Видят не все роли</span></span>11 200 ₽</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="accordion-item">
+          <div class="accordion-head" onclick="this.parentElement.classList.toggle('open')">
+            <b>Кухня-гостиная</b>
+            <svg class="icon icon-sm chev" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5"/></svg>
+          </div>
+          <div class="accordion-body">
+            <p class="text-sm text-muted" style="margin-bottom:8px;">Океан «Роялти» · со стеклом матовым, царговая</p>
+            <div class="price-row head"><span>Позиция</span><span class="price-cell">База РРЦ</span><span class="price-cell">Продажная</span><span class="price-cell">Клиенту</span><span class="price-cell">Закупочная</span></div>
+            <div class="price-row">
+              <span class="price-cell name">Океан «Роялти» 900×2000, стекло</span>
+              <span class="price-cell num">22 300 ₽</span>
+              <span class="price-cell num">20 800 ₽</span>
+              <span class="price-cell num">19 800 ₽</span>
+              <span class="price-cell num"><span class="tip lock"><svg class="icon icon-sm" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z"/></svg><span class="tip-bubble">Видят не все роли</span></span>12 900 ₽</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="divider-h"></div>
+
+        <!-- БЛАНК ОБСЛУЖИВАНИЯ -->
+        <div class="card card-pad" style="margin-bottom:20px;">
+          <div class="card-head"><h3>Бланк обслуживания</h3></div>
+          <div class="gap-8-wrap">
+            <button class="btn btn-accent" onclick="location.hash='#/store/forms'"><svg class="icon icon-sm" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/></svg>Активировать форму (ВХ/МК/Звонок)</button>
+            <button class="btn"><svg class="icon icon-sm" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75V15m3-8.25v6m3-3.75V15M6.75 4.5h10.5A1.5 1.5 0 0118.75 6v13.5a1.5 1.5 0 01-1.5 1.5H6.75a1.5 1.5 0 01-1.5-1.5V6a1.5 1.5 0 011.5-1.5z"/></svg>Загрузить скан</button>
+          </div>
+        </div>
+
+        <div class="grid grid-2" style="align-items:start;">
+          <div class="card card-pad">
+            <div class="card-head"><h3>Задачи по сделке</h3></div>
+            <div class="list">
+              <div class="list-item"><div class="list-check" role="checkbox" aria-checked="false" tabindex="0"></div><div class="list-main"><div class="list-title">Позвонить по замеру</div><div class="list-sub">до 18:00 сегодня · Максим П.</div></div></div>
+              <div class="list-item"><div class="list-check checked" role="checkbox" aria-checked="true" tabindex="0"><svg viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg></div><div class="list-main"><div class="list-title" style="text-decoration:line-through;color:var(--secondary)">Отправить КП клиенту</div><div class="list-sub">Выполнено 19.09</div></div></div>
+              <div class="list-item"><div class="list-check" role="checkbox" aria-checked="false" tabindex="0"></div><div class="list-main"><div class="list-title">Согласовать срок поставки</div><div class="list-sub">до 25.09</div></div></div>
+            </div>
+          </div>
+          <div class="card card-pad">
+            <div class="card-head"><h3>История</h3></div>
+            <div class="list">
+              <div class="list-item"><div class="list-main"><div class="list-title">Замер назначен</div><div class="list-sub">21.09, 09:58 · Максим П.</div></div></div>
+              <div class="list-item"><div class="list-main"><div class="list-title">КП отправлено в WhatsApp</div><div class="list-sub">19.09, 18:40</div></div></div>
+              <div class="list-item"><div class="list-main"><div class="list-title">Лид взят в работу</div><div class="list-sub">18.09, 14:02</div></div></div>
+              <div class="list-item"><div class="list-main"><div class="list-title">Заявка с сайта</div><div class="list-sub">18.09, 13:55</div></div></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card card-pad" style="margin-top:16px;">
+          <div class="card-head"><h3>Предложенные варианты</h3></div>
+          <div class="grid grid-2">
+            <div class="card card-pad" style="box-shadow:none;">
+              <b>Гефест «Термо»</b>
+              <p class="text-sm text-muted" style="margin:6px 0;">Терморазрыв, усиленный замок, шумоизоляция 42 дБ</p>
+              <div class="flex-between"><span class="num cell-strong">42 000 ₽</span><span class="badge badge-success">Выбран клиентом</span></div>
+            </div>
+            <div class="card card-pad" style="box-shadow:none;">
+              <b>Океан «Форт»</b>
+              <p class="text-sm text-muted" style="margin:6px 0;">Классическая, замок цилиндровый, бюджетный сегмент</p>
+              <div class="flex-between"><span class="num cell-strong">31 500 ₽</span><span class="badge badge-neutral">Запасной вариант</span></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card card-pad" style="margin-top:16px; display:flex; align-items:center; gap:14px; flex-wrap:wrap;">
+          <svg class="icon" viewBox="0 0 24 24" style="color:var(--accent)"><path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5"/></svg>
+          <div><b>Запись на замер:</b> 24.09, 10:00 · подтверждение через WhatsApp</div>
+          <button class="btn btn-sm" style="margin-left:auto;">Перенести</button>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================================= -->
+  <!-- 6. КОНТАКТЫ И ОРГАНИЗАЦИИ -->
+  <!-- ========================================================= -->
+  <section class="view" id="view-store-contacts" data-cabinet-view="store" hidden>
+    <div class="view-head">
+      <span class="view-tag">Согласуем: разделение физлиц и организаций + карточка контакта</span>
+      <h1 class="view-title">Контакты и организации</h1>
+      <p class="view-sub">Единая база клиентов магазина</p>
+    </div>
+
+    <div class="tabs">
+      <button class="tab-btn active" data-tab="contactsTab">Контакты (физлица)</button>
+      <button class="tab-btn" data-tab="orgsTab">Организации</button>
+    </div>
+
+    <div id="contactsTab" class="tab-panel">
+      <div class="grid" style="grid-template-columns:1fr 1.4fr; align-items:start;">
+        <div class="table-wrap card">
+          <table>
+            <thead><tr><th>Имя</th><th>Телефон</th><th>Сделок</th></tr></thead>
+            <tbody>
+              <tr class="cell-strong" style="background:var(--accent-soft);cursor:pointer;"><td>Виктор Синицын</td><td class="num">+7 918 400-11-22</td><td class="num">1</td></tr>
+              <tr style="cursor:pointer;"><td>Дмитрий Крылов</td><td class="num">+7 900 233-44-55</td><td class="num">1</td></tr>
+              <tr style="cursor:pointer;"><td>Наталья Ефимова</td><td class="num">+7 951 622-33-44</td><td class="num">2</td></tr>
+              <tr style="cursor:pointer;"><td>Сергей Гуляев</td><td class="num">+7 908 744-55-66</td><td class="num">3</td></tr>
+              <tr style="cursor:pointer;"><td>Марина Соловьёва</td><td class="num">+7 918 222-66-77</td><td class="num">1</td></tr>
+              <tr style="cursor:pointer;"><td>Игорь Тарасов</td><td class="num">+7 902 111-88-99</td><td class="num">1</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="card card-pad">
+          <div class="card-head"><h3>Карточка контакта</h3><span class="badge badge-accent">Активен</span></div>
+          <div style="display:flex;align-items:center;gap:14px;margin-bottom:18px;">
+            <div class="avatar" style="width:52px;height:52px;font-size:18px;">ВС</div>
+            <div>
+              <div style="font-weight:700;font-size:16px;">Виктор Синицын</div>
+              <div class="text-sm text-muted">Клиент с 18.09.2026 · источник: сайт</div>
+            </div>
+          </div>
+          <div class="field-grid">
+            <div class="field"><label>Телефон</label><input type="text" value="+7 918 400-11-22" readonly></div>
+            <div class="field"><label>Email</label><input type="text" value="v.sinitsyn@mail.ru" readonly></div>
+            <div class="field"><label>Адрес объекта</label><input type="text" value="ул. Стачки, 245, кв. 12" readonly></div>
+            <div class="field"><label>Ответственный</label><input type="text" value="Ирина Соколова" readonly></div>
+          </div>
+          <div class="card-head" style="margin-top:6px;"><h3 style="font-size:13px;">Сделки контакта</h3></div>
+          <div class="list">
+            <div class="list-item" onclick="openDeal()"><div class="list-main"><div class="list-title">№4152 · Встреча</div><div class="list-sub">42 000 ₽ · обновлено сегодня</div></div><span class="badge badge-accent">В работе</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div id="orgsTab" class="tab-panel" hidden>
+      <div class="table-wrap card">
+        <table>
+          <thead><tr><th>Организация</th><th>ИНН</th><th>Контактное лицо</th><th>Сделок</th><th>Сумма сделок</th></tr></thead>
+          <tbody>
+            <tr style="cursor:pointer;"><td class="cell-strong">ООО «Дон-Интерьер»</td><td class="num">6163098765</td><td>Быкова Е. А.</td><td class="num">3</td><td class="num cell-strong">890 000 ₽</td></tr>
+            <tr style="cursor:pointer;"><td class="cell-strong">ИП Логинов А. С.</td><td class="num">616311223344</td><td>Логинов А. С.</td><td class="num">1</td><td class="num cell-strong">184 000 ₽</td></tr>
+            <tr style="cursor:pointer;"><td class="cell-strong">ООО «СтройГрад»</td><td class="num">6165554433</td><td>Волков А. И.</td><td class="num">2</td><td class="num cell-strong">612 000 ₽</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========================================================= -->
+  <!-- 7. БЛАНКИ ОБСЛУЖИВАНИЯ -->
+  <!-- ========================================================= -->
+  <section class="view" id="view-store-forms" data-cabinet-view="store" hidden>
+    <div class="view-head">
+      <span class="view-tag">Согласуем: три сценарных бланка вместо разрозненных бумажных анкет</span>
+      <h1 class="view-title">Бланки обслуживания</h1>
+      <p class="view-sub">По заполненному бланку автоматически создаётся или дополняется карточка сделки</p>
+    </div>
+
+    <div class="grid grid-3">
+      <div class="card card-pad" style="text-align:center;">
+        <div class="kpi-icon" style="margin:0 auto 12px;background:var(--warning-soft);color:var(--warning);"><svg class="icon" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 6.75c0 8.284 6.716 15 15 15h2.25a1.5 1.5 0 001.5-1.5V17.25a1.5 1.5 0 00-1.5-1.5H16.5a1.5 1.5 0 00-1.06.44l-1.5 1.5a11.25 11.25 0 01-6.128-6.128l1.5-1.5a1.5 1.5 0 00.44-1.06V4.5a1.5 1.5 0 00-1.5-1.5H4.5a1.5 1.5 0 00-1.5 1.5v2.25z"/></svg></div>
+        <h3 style="margin-bottom:6px;">Звонок входящий</h3>
+        <p class="text-sm text-muted" style="margin-bottom:16px;">Быстрая карточка первичного звонка</p>
+        <button class="btn btn-accent btn-block" onclick="openForm('call')">Открыть бланк</button>
+      </div>
+      <div class="card card-pad" style="text-align:center;">
+        <div class="kpi-icon" style="margin:0 auto 12px;background:var(--accent-soft);color:var(--accent);"><svg class="icon" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 21v-7.5a.75.75 0 01.75-.75h3a.75.75 0 01.75.75V21M3 8.25l1.5 5.25v6a.75.75 0 00.75.75H18.75a.75.75 0 00.75-.75v-6l1.5-5.25M3 8.25h18M3 8.25L4.5 3h15L21 8.25"/></svg></div>
+        <h3 style="margin-bottom:6px;">Входные двери (ВХ)</h3>
+        <p class="text-sm text-muted" style="margin-bottom:16px;">Подробная анкета под замер входной группы</p>
+        <button class="btn btn-accent btn-block" onclick="openForm('vh')">Открыть бланк</button>
+      </div>
+      <div class="card card-pad" style="text-align:center;">
+        <div class="kpi-icon" style="margin:0 auto 12px;background:var(--success-soft);color:var(--success);"><svg class="icon" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 21h8.25M9.75 3h4.5v18h-4.5V3zM4.5 8.25h5.25v9.75H4.5V8.25zm9.75 3h5.25v6.75h-5.25v-6.75z"/></svg></div>
+        <h3 style="margin-bottom:6px;">Межкомнатные (МК)</h3>
+        <p class="text-sm text-muted" style="margin-bottom:16px;">Подробная анкета под межкомнатные двери</p>
+        <button class="btn btn-accent btn-block" onclick="openForm('mk')">Открыть бланк</button>
+      </div>
+    </div>
+
+    <div class="card card-pad" style="margin-top:20px;">
+      <div class="card-head"><h3>Последние заполненные бланки</h3></div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Тип</th><th>Клиент</th><th>Заполнен</th><th>Режим</th><th>Сделка</th></tr></thead>
+          <tbody>
+            <tr><td><span class="badge badge-accent">ВХ</span></td><td class="cell-strong">Дмитрий Крылов</td><td class="cell-muted">сегодня 09:58</td><td>Цифровой</td><td><a href="#" onclick="event.preventDefault();openDeal();">№4128 →</a></td></tr>
+            <tr><td><span class="badge badge-success">МК</span></td><td class="cell-strong">Наталья Ефимова</td><td class="cell-muted">вчера 16:40</td><td>Скан бумажного</td><td><a href="#" onclick="event.preventDefault();openDeal();">№4131 →</a></td></tr>
+            <tr><td><span class="badge badge-warning">Звонок</span></td><td class="cell-strong">Виктор Синицын</td><td class="cell-muted">18.09 13:55</td><td>Цифровой</td><td><a href="#" onclick="event.preventDefault();openDeal();">№4152 →</a></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== МОДАЛ: БЛАНК «ЗВОНОК ВХОДЯЩИЙ» ===== -->
+  <div class="modal-center" id="modal-call" aria-hidden="true">
+    <div class="modal-box" role="dialog" aria-modal="true" aria-labelledby="modalCallTitle">
+      <div class="modal-box-head">
+        <h3 id="modalCallTitle">Бланк: Звонок входящий</h3>
+        <button class="panel-close" onclick="closeForm('call')" aria-label="Закрыть"><svg class="icon" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg></button>
+      </div>
+      <div class="modal-box-body">
+        <div class="form-mode-switch">
+          <button class="btn btn-sm btn-accent" data-mode-btn onclick="setFormMode('call','digital',this)">Заполнить цифровой</button>
+          <button class="btn btn-sm" data-mode-btn onclick="setFormMode('call','scan',this)">Загрузить скан бумажного бланка</button>
+        </div>
+
+        <div data-mode-panel="digital">
+          <div class="field"><label>Имя клиента</label><input type="text" placeholder="Как обращаться"></div>
+          <div class="field">
+            <label>Что интересует</label>
+            <div class="choice-group">
+              <label class="choice"><input type="checkbox"><span>Входные (ВХ)</span></label>
+              <label class="choice"><input type="checkbox"><span>Межкомнатные (МК)</span></label>
+              <label class="choice"><input type="checkbox"><span>Конкретная модель</span></label>
+              <label class="choice"><input type="checkbox"><span>Акции / скидки</span></label>
+            </div>
+          </div>
+          <div class="field">
+            <label>Предложить визит / замер (600 ₽)</label>
+            <div class="choice-group">
+              <label class="choice checked"><input type="radio" name="call-visit" checked><span>Да, записать</span></label>
+              <label class="choice"><input type="radio" name="call-visit"><span>Клиент подумает</span></label>
+              <label class="choice"><input type="radio" name="call-visit"><span>Отказ</span></label>
+            </div>
+          </div>
+          <div class="section-divider">Контакты</div>
+          <div class="field-grid">
+            <div class="field"><label>ФИО</label><input type="text" placeholder="Фамилия Имя Отчество"></div>
+            <div class="field"><label>Адрес</label><input type="text" placeholder="Улица, дом, квартира"></div>
+            <div class="field"><label>Телефон 1</label><input type="tel" placeholder="+7"></div>
+            <div class="field"><label>Телефон 2</label><input type="tel" placeholder="+7 (доп.)"></div>
+            <div class="field"><label>Email</label><input type="email" placeholder="mail@example.com"></div>
+            <div class="field"><label>Желаемый срок установки</label><input type="text" placeholder="напр. до конца октября"></div>
+          </div>
+          <div class="field"><label>Откуда узнали о нас</label>
+            <select><option>Сайт</option><option>Рекомендация</option><option>Наружная реклама</option><option>Avito</option><option>Соцсети</option><option>Проезжал мимо шоурума</option></select>
+          </div>
+        </div>
+
+        <div data-mode-panel="scan" hidden>
+          <div class="dropzone">
+            <svg class="icon icon-lg" style="margin:0 auto 10px;display:block;" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75V15m3-8.25v6m3-3.75V15M6.75 4.5h10.5A1.5 1.5 0 0118.75 6v13.5a1.5 1.5 0 01-1.5 1.5H6.75a1.5 1.5 0 01-1.5-1.5V6a1.5 1.5 0 011.5-1.5z"/></svg>
+            Перетащите фото или PDF бумажного бланка сюда<br><span class="text-sm">или нажмите, чтобы выбрать файл</span>
+          </div>
+        </div>
+
+        <div class="autonote"><svg class="icon icon-sm" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M11.25 11.25l.041-.02a.75.75 0 011.063.852l-.708 2.836a.75.75 0 001.063.853l.041-.021M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9-3.75h.008v.008H12V8.25z"/></svg>По этому бланку автоматически создаётся карточка сделки</div>
+        <div class="gap-8" style="margin-top:18px;justify-content:end;">
+          <button class="btn" onclick="closeForm('call')">Отмена</button>
+          <button class="btn btn-primary" onclick="submitForm('call')">Создать сделку</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== МОДАЛ: БЛАНК «ВХОДНЫЕ ДВЕРИ (ВХ)» ===== -->
+  <div class="modal-center" id="modal-vh" aria-hidden="true">
+    <div class="modal-box" role="dialog" aria-modal="true" aria-labelledby="modalVhTitle">
+      <div class="modal-box-head">
+        <h3 id="modalVhTitle">Бланк: Входные двери (ВХ)</h3>
+        <button class="panel-close" onclick="closeForm('vh')" aria-label="Закрыть"><svg class="icon" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg></button>
+      </div>
+      <div class="modal-box-body">
+        <div class="form-mode-switch">
+          <button class="btn btn-sm btn-accent" data-mode-btn onclick="setFormMode('vh','digital',this)">Заполнить цифровой</button>
+          <button class="btn btn-sm" data-mode-btn onclick="setFormMode('vh','scan',this)">Загрузить скан бумажного бланка</button>
+        </div>
+
+        <div data-mode-panel="digital">
+          <div class="field"><label>Обращались ранее?</label>
+            <div class="choice-group"><label class="choice checked"><input type="radio" name="vh-prev" checked><span>Нет, впервые</span></label><label class="choice"><input type="radio" name="vh-prev"><span>Да, повторно</span></label></div>
+          </div>
+          <div class="field"><label>Тип потребности</label>
+            <div class="choice-group"><label class="choice"><input type="radio" name="vh-type"><span>Только входные</span></label><label class="choice checked"><input type="radio" name="vh-type" checked><span>Входные + межкомнатные</span></label></div>
+          </div>
+          <div class="field-grid">
+            <div class="field"><label>Тип жилья</label><select><option>Квартира</option><option>Частный дом</option></select></div>
+            <div class="field"><label>Новостройка / вторичка</label><select><option>Новостройка</option><option>Вторичное жильё</option></select></div>
+            <div class="field"><label>Когда нужна дверь</label><input type="text" placeholder="напр. в течение месяца"></div>
+            <div class="field"><label>Дизайн-проект</label><select><option>Есть дизайн-проект</option><option>Подбираем сами</option></select></div>
+          </div>
+          <div class="section-divider">Что важно клиенту</div>
+          <div class="field"><label>Замки</label>
+            <div class="choice-group"><label class="choice"><input type="checkbox"><span>Обычные</span></label><label class="choice checked"><input type="checkbox" checked><span>Усиленные</span></label><label class="choice"><input type="checkbox"><span>Электронные (по отпечатку)</span></label></div>
+          </div>
+          <div class="field"><label>Металл полотна</label>
+            <div class="choice-group"><label class="choice checked"><input type="radio" name="vh-metal" checked><span>Толстый 1.5–2 мм</span></label><label class="choice"><input type="radio" name="vh-metal"><span>Тонкий</span></label></div>
+          </div>
+          <div class="field"><label>Шумоизоляция важна</label>
+            <div class="choice-group"><label class="choice checked"><input type="checkbox" checked><span>Да, важна</span></label></div>
+          </div>
+          <div class="field"><label>Категория цены</label>
+            <div class="choice-group">
+              <label class="choice"><input type="radio" name="vh-price"><span>Бюджет, до 35 000 ₽</span></label>
+              <label class="choice checked"><input type="radio" name="vh-price" checked><span>Средняя, 35–100 тыс ₽</span></label>
+              <label class="choice"><input type="radio" name="vh-price"><span>Премиум, от 100 тыс ₽</span></label>
+            </div>
+          </div>
+          <div class="field" id="vhHouseOnly"><label>Для частного дома дополнительно</label>
+            <div class="choice-group"><label class="choice"><input type="checkbox"><span>Терморазрыв</span></label><label class="choice"><input type="checkbox"><span>Со стеклопакетом (окно)</span></label><label class="choice"><input type="checkbox"><span>Эксклюзивное исполнение</span></label></div>
+          </div>
+
+          <div class="section-divider">Предложенные варианты</div>
+          <div class="field-grid">
+            <div class="field"><label>Вариант 1</label><input type="text" value="Гефест «Термо» — 42 000 ₽"></div>
+            <div class="field"><label>Вариант 2</label><input type="text" value="Океан «Форт» — 31 500 ₽"></div>
+          </div>
+
+          <div class="section-divider">Запись на замер</div>
+          <div class="field-grid">
+            <div class="field"><label>Дата</label><input type="date" value="2026-09-24"></div>
+            <div class="field"><label>Канал подтверждения</label><select><option>WhatsApp</option><option>Звонок</option><option>SMS</option></select></div>
+            <div class="field"><label>ФИО</label><input type="text" placeholder="Фамилия Имя Отчество"></div>
+            <div class="field"><label>Адрес</label><input type="text" placeholder="Улица, дом, квартира"></div>
+            <div class="field"><label>Телефон</label><input type="tel" placeholder="+7"></div>
+            <div class="field"><label>Откуда узнали</label><select><option>Сайт</option><option>Рекомендация</option><option>Avito</option><option>Наружная реклама</option></select></div>
+          </div>
+          <div class="field"><label>Нужна консультация по межкомнатным дверям?</label>
+            <div class="choice-group"><label class="choice checked"><input type="radio" name="vh-mk" checked><span>Да</span></label><label class="choice"><input type="radio" name="vh-mk"><span>Нет</span></label></div>
+          </div>
+        </div>
+
+        <div data-mode-panel="scan" hidden>
+          <div class="dropzone">
+            <svg class="icon icon-lg" style="margin:0 auto 10px;display:block;" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75V15m3-8.25v6m3-3.75V15M6.75 4.5h10.5A1.5 1.5 0 0118.75 6v13.5a1.5 1.5 0 01-1.5 1.5H6.75a1.5 1.5 0 01-1.5-1.5V6a1.5 1.5 0 011.5-1.5z"/></svg>
+            Перетащите фото или PDF бумажного бланка ВХ<br><span class="text-sm">или нажмите, чтобы выбрать файл</span>
+          </div>
+        </div>
+
+        <div class="autonote"><svg class="icon icon-sm" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M11.25 11.25l.041-.02a.75.75 0 011.063.852l-.708 2.836a.75.75 0 001.063.853l.041-.021M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9-3.75h.008v.008H12V8.25z"/></svg>По этому бланку автоматически заполняется карточка сделки</div>
+        <div class="gap-8" style="margin-top:18px;justify-content:end;">
+          <button class="btn" onclick="closeForm('vh')">Отмена</button>
+          <button class="btn btn-primary" onclick="submitForm('vh')">Сохранить в сделку</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== МОДАЛ: БЛАНК «МЕЖКОМНАТНЫЕ (МК)» ===== -->
+  <div class="modal-center" id="modal-mk" aria-hidden="true">
+    <div class="modal-box" role="dialog" aria-modal="true" aria-labelledby="modalMkTitle">
+      <div class="modal-box-head">
+        <h3 id="modalMkTitle">Бланк: Межкомнатные двери (МК)</h3>
+        <button class="panel-close" onclick="closeForm('mk')" aria-label="Закрыть"><svg class="icon" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg></button>
+      </div>
+      <div class="modal-box-body">
+        <div class="form-mode-switch">
+          <button class="btn btn-sm btn-accent" data-mode-btn onclick="setFormMode('mk','digital',this)">Заполнить цифровой</button>
+          <button class="btn btn-sm" data-mode-btn onclick="setFormMode('mk','scan',this)">Загрузить скан бумажного бланка</button>
+        </div>
+
+        <div data-mode-panel="digital">
+          <div class="field-grid">
+            <div class="field"><label>Количество дверей</label><input type="text" value="5"></div>
+            <div class="field"><label>Новостройка / вторичка</label><select><option>Новостройка</option><option>Вторичное жильё</option></select></div>
+          </div>
+          <div class="field"><label>Стиль</label>
+            <div class="choice-group">
+              <label class="choice"><input type="radio" name="mk-style"><span>Скрытые</span></label>
+              <label class="choice checked"><input type="radio" name="mk-style" checked><span>Современный</span></label>
+              <label class="choice"><input type="radio" name="mk-style"><span>Классический</span></label>
+              <label class="choice"><input type="radio" name="mk-style"><span>Неоклассика</span></label>
+            </div>
+          </div>
+          <div class="field"><label>Полотно</label>
+            <div class="choice-group">
+              <label class="choice checked"><input type="radio" name="mk-glass" checked><span>Глухое</span></label>
+              <label class="choice"><input type="radio" name="mk-glass"><span>Со стеклом прозрачным</span></label>
+              <label class="choice"><input type="radio" name="mk-glass"><span>Со стеклом матовым</span></label>
+            </div>
+          </div>
+          <div class="field"><label>Конструкция полотна</label>
+            <div class="choice-group">
+              <label class="choice checked"><input type="checkbox" checked><span>Царговые</span></label>
+              <label class="choice"><input type="checkbox"><span>Гладкие</span></label>
+              <label class="choice"><input type="checkbox"><span>Фрезеровка</span></label>
+              <label class="choice"><input type="checkbox"><span>Багет</span></label>
+            </div>
+          </div>
+          <div class="field"><label>Покрытие</label>
+            <div class="choice-group">
+              <label class="choice"><input type="radio" name="mk-cover"><span>Плёнка ПВХ</span></label>
+              <label class="choice checked"><input type="radio" name="mk-cover" checked><span>Эмаль</span></label>
+              <label class="choice"><input type="radio" name="mk-cover"><span>Шпон</span></label>
+              <label class="choice"><input type="radio" name="mk-cover"><span>Массив</span></label>
+            </div>
+          </div>
+          <div class="field"><label>Цвет</label>
+            <div class="choice-group"><label class="choice checked"><input type="radio" name="mk-color" checked><span>Белый</span></label><label class="choice"><input type="radio" name="mk-color"><span>Серый</span></label><label class="choice"><input type="radio" name="mk-color"><span>Свой вариант</span></label></div>
+          </div>
+          <div class="field"><label>Сочетать с входной дверью</label>
+            <div class="choice-group"><label class="choice checked"><input type="radio" name="mk-match" checked><span>Да</span></label><label class="choice"><input type="radio" name="mk-match"><span>Нет</span></label></div>
+          </div>
+          <div class="field"><label>Категория цены</label>
+            <div class="choice-group">
+              <label class="choice"><input type="radio" name="mk-price"><span>Бюджет, до 10 тыс ₽</span></label>
+              <label class="choice checked"><input type="radio" name="mk-price" checked><span>Средняя, до 30 тыс ₽</span></label>
+              <label class="choice"><input type="radio" name="mk-price"><span>Премиум, от 30 тыс ₽</span></label>
+            </div>
+          </div>
+
+          <div class="section-divider">Фурнитура</div>
+          <div class="field"><label>Цвет фурнитуры</label>
+            <div class="choice-group">
+              <label class="choice checked"><input type="radio" name="mk-hw-color" checked><span>Чёрный</span></label>
+              <label class="choice"><input type="radio" name="mk-hw-color"><span>Хром матовый</span></label>
+              <label class="choice"><input type="radio" name="mk-hw-color"><span>Хром</span></label>
+              <label class="choice"><input type="radio" name="mk-hw-color"><span>Белый</span></label>
+              <label class="choice"><input type="radio" name="mk-hw-color"><span>Золото матовое</span></label>
+            </div>
+          </div>
+          <div class="field"><label>Ручки</label>
+            <div class="choice-group"><label class="choice checked"><input type="radio" name="mk-handle" checked><span>Квадратная</span></label><label class="choice"><input type="radio" name="mk-handle"><span>Круглая</span></label><label class="choice"><input type="radio" name="mk-handle"><span>Тонкая</span></label></div>
+          </div>
+          <div class="field"><label>Петли</label>
+            <div class="choice-group"><label class="choice checked"><input type="radio" name="mk-hinge" checked><span>Скрытые</span></label><label class="choice"><input type="radio" name="mk-hinge"><span>Врезные</span></label><label class="choice"><input type="radio" name="mk-hinge"><span>Накладные</span></label></div>
+          </div>
+          <div class="field"><label>Защёлки</label>
+            <div class="choice-group"><label class="choice checked"><input type="radio" name="mk-latch" checked><span>Магнитные бесшумные</span></label><label class="choice"><input type="radio" name="mk-latch"><span>Обычные</span></label></div>
+          </div>
+          <div class="field"><label>Дополнительно</label>
+            <div class="choice-group"><label class="choice checked"><input type="checkbox" checked><span>Скрытые ограничители</span></label><label class="choice"><input type="checkbox"><span>Автопорог</span></label></div>
+          </div>
+
+          <div class="section-divider">Предложенные варианты</div>
+          <div class="field-grid">
+            <div class="field"><label>Вариант 1</label><input type="text" value="Океан «Роялти» — 20 800 ₽/шт"></div>
+            <div class="field"><label>Вариант 2</label><input type="text" value="Перфекто «Стайл» — 14 200 ₽/шт"></div>
+          </div>
+
+          <div class="section-divider">Запись на замер</div>
+          <div class="field-grid">
+            <div class="field"><label>Дата</label><input type="date" value="2026-09-25"></div>
+            <div class="field"><label>Канал подтверждения</label><select><option>WhatsApp</option><option>Звонок</option><option>SMS</option></select></div>
+            <div class="field"><label>Откуда узнали</label><select><option>Сайт</option><option>Рекомендация</option><option>Avito</option><option>Соцсети</option></select></div>
+            <div class="field"><label>Нужна входная дверь?</label>
+              <div class="choice-group"><label class="choice"><input type="radio" name="mk-vh"><span>Да</span></label><label class="choice checked"><input type="radio" name="mk-vh" checked><span>Нет</span></label></div>
+            </div>
+          </div>
+        </div>
+
+        <div data-mode-panel="scan" hidden>
+          <div class="dropzone">
+            <svg class="icon icon-lg" style="margin:0 auto 10px;display:block;" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75V15m3-8.25v6m3-3.75V15M6.75 4.5h10.5A1.5 1.5 0 0118.75 6v13.5a1.5 1.5 0 01-1.5 1.5H6.75a1.5 1.5 0 01-1.5-1.5V6a1.5 1.5 0 011.5-1.5z"/></svg>
+            Перетащите фото или PDF бумажного бланка МК<br><span class="text-sm">или нажмите, чтобы выбрать файл</span>
+          </div>
+        </div>
+
+        <div class="autonote"><svg class="icon icon-sm" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M11.25 11.25l.041-.02a.75.75 0 011.063.852l-.708 2.836a.75.75 0 001.063.853l.041-.021M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9-3.75h.008v.008H12V8.25z"/></svg>По этому бланку автоматически заполняется карточка сделки</div>
+        <div class="gap-8" style="margin-top:18px;justify-content:end;">
+          <button class="btn" onclick="closeForm('mk')">Отмена</button>
+          <button class="btn btn-primary" onclick="submitForm('mk')">Сохранить в сделку</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================================= -->
+  <!-- 8. КОНФИГУРАТОР ДВЕРЕЙ -->
+  <!-- ========================================================= -->
+  <section class="view" id="view-store-configurator" data-cabinet-view="store" hidden>
+    <div class="view-head">
+      <span class="view-tag">Согласуем: сборка комплекта двери менеджером прямо в сделке</span>
+      <h1 class="view-title">Конфигуратор дверей</h1>
+      <p class="view-sub">Выбор фабрики, модели и опций — справа итоговая стоимость по 4 ценам</p>
+    </div>
+
+    <div class="grid" style="grid-template-columns:1.6fr 1fr; align-items:start;">
+      <div class="card card-pad">
+        <div class="field"><label>Фабрика</label>
+          <div class="choice-group">
+            <label class="choice checked"><input type="radio" name="cfg-factory" checked><span>Гефест</span></label>
+            <label class="choice"><input type="radio" name="cfg-factory"><span>Океан</span></label>
+            <label class="choice"><input type="radio" name="cfg-factory"><span>Перфекто</span></label>
+            <label class="choice"><input type="radio" name="cfg-factory"><span>Кайзер</span></label>
+            <label class="choice"><input type="radio" name="cfg-factory"><span>Форпост</span></label>
+          </div>
+        </div>
+        <div class="field"><label>Модель</label>
+          <div class="choice-group">
+            <label class="choice checked"><input type="radio" name="cfg-model" checked><span>Термо</span></label>
+            <label class="choice"><input type="radio" name="cfg-model"><span>Форт</span></label>
+            <label class="choice"><input type="radio" name="cfg-model"><span>Ультра</span></label>
+          </div>
+        </div>
+        <div class="field-grid">
+          <div class="field"><label>Размер проёма</label><select><option>860×2050</option><option selected>960×2050</option><option>1060×2050</option><option>Индивидуальный</option></select></div>
+          <div class="field"><label>Сторона открывания</label><select><option>Левая</option><option selected>Правая</option></select></div>
+          <div class="field"><label>Отделка полотна</label><select><option>Порошковая краска</option><option selected>Терморазрыв + МДФ</option><option>Шпон</option></select></div>
+          <div class="field"><label>Короб</label><select><option selected>Стандартный 100 мм</option><option>Расширенный 150 мм</option></select></div>
+          <div class="field"><label>Погонаж / наличники</label><select><option selected>Стандартные</option><option>Широкие</option><option>Без наличников</option></select></div>
+          <div class="field"><label>Петли</label><select><option>Врезные 2 шт</option><option selected>Врезные 3 шт</option><option>Скрытые</option></select></div>
+          <div class="field"><label>Замки</label><select><option>Цилиндровый</option><option selected>Сувальдный + цилиндровый</option><option>Электронный по отпечатку</option></select></div>
+          <div class="field"><label>Ручка</label><select><option selected>Скоба хром</option><option>Скоба чёрная</option><option>Комплект нажимной</option></select></div>
+        </div>
+        <div class="field"><label>Дополнительно</label>
+          <div class="choice-group">
+            <label class="choice checked"><input type="checkbox" checked><span>Шумоизоляция</span></label>
+            <label class="choice"><input type="checkbox"><span>Терморазрыв усиленный</span></label>
+            <label class="choice"><input type="checkbox"><span>Глазок</span></label>
+            <label class="choice"><input type="checkbox"><span>Антивандальное покрытие</span></label>
+          </div>
+        </div>
+      </div>
+
+      <div class="card card-pad" style="position:sticky; top:0;">
+        <div class="card-head"><h3>Итог комплекта</h3></div>
+        <div class="list" style="margin-bottom:12px;">
+          <div class="list-item"><div class="list-main"><div class="list-title">Гефест «Термо» 960×2050</div><div class="list-sub">Правая, терморазрыв</div></div></div>
+          <div class="list-item"><div class="list-main"><div class="list-title">Короб + наличники</div><div class="list-sub">Стандартные</div></div></div>
+          <div class="list-item"><div class="list-main"><div class="list-title">Замок сувальдный + цилиндровый</div></div></div>
+          <div class="list-item"><div class="list-main"><div class="list-title">Ручка-скоба хром</div></div></div>
+        </div>
+        <div class="divider-h"></div>
+        <div class="price-row head"><span>—</span><span class="price-cell">РРЦ</span><span class="price-cell">Продажная</span><span class="price-cell">Клиенту</span><span class="price-cell">Закупка</span></div>
+        <div class="price-row">
+          <span class="price-cell name">Итого</span>
+          <span class="price-cell num cell-strong">48 000 ₽</span>
+          <span class="price-cell num cell-strong">45 000 ₽</span>
+          <span class="price-cell num cell-strong">42 000 ₽</span>
+          <span class="price-cell num cell-strong"><span class="tip lock"><svg class="icon icon-sm" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z"/></svg><span class="tip-bubble">Видят не все роли</span></span>27 400 ₽</span>
+        </div>
+        <button class="btn btn-primary btn-block" style="margin-top:16px;" onclick="openDeal()">В сделку</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========================================================= -->
+  <!-- 9. ЗАДАЧИ -->
+  <!-- ========================================================= -->
+  <section class="view" id="view-store-tasks" data-cabinet-view="store" hidden>
+    <div class="view-head">
+      <span class="view-tag">Согласуем: общий список задач по всем сделкам и клиентам магазина</span>
+      <h1 class="view-title">Задачи</h1>
+      <p class="view-sub">24 открытых задачи у 5 менеджеров</p>
+    </div>
+    <div class="table-wrap card">
+      <table>
+        <thead><tr><th>Задача</th><th>По сделке / клиенту</th><th>Срок</th><th>Ответственный</th><th>Статус</th></tr></thead>
+        <tbody>
+          <tr><td class="cell-strong">Позвонить по замеру</td><td>Дмитрий Крылов · №4128</td><td class="cell-muted">сегодня 18:00</td><td>Максим П.</td><td><span class="badge badge-danger">Срочно</span></td></tr>
+          <tr><td class="cell-strong">Отправить КП по МК</td><td>Наталья Ефимова · №4131</td><td class="cell-muted">сегодня 16:00</td><td>Ирина С.</td><td><span class="badge badge-warning">Сегодня</span></td></tr>
+          <tr><td class="cell-strong">Подтвердить доставку</td><td>ООО «СтройГрад» · №4076</td><td class="cell-muted">завтра 10:00</td><td>Артём В.</td><td><span class="badge badge-neutral">Запланировано</span></td></tr>
+          <tr><td class="cell-strong">Запросить отзыв</td><td>Сергей Гуляев · №4040</td><td class="cell-muted">завтра</td><td>Ирина С.</td><td><span class="badge badge-neutral">Запланировано</span></td></tr>
+          <tr><td class="cell-strong">Согласовать скидку с РОП</td><td>Игорь Тарасов · №4140</td><td class="cell-muted">просрочено на 1 день</td><td>Ирина С.</td><td><span class="badge badge-danger">Просрочено</span></td></tr>
+          <tr><td class="cell-strong">Уточнить срок поставки у фабрики</td><td>Павел Жуков · №4145</td><td class="cell-muted">25.09</td><td>Елена Д.</td><td><span class="badge badge-neutral">Запланировано</span></td></tr>
+          <tr><td class="cell-strong">Назначить бригаду на монтаж</td><td>Марина Соловьёва · №4061</td><td class="cell-muted">22.09</td><td>Светлана Н.</td><td><span class="badge badge-warning">Сегодня</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- ========================================================= -->
+  <!-- 10. ОБМЕН И ИНТЕГРАЦИИ -->
+  <!-- ========================================================= -->
+  <section class="view" id="view-store-integrations" data-cabinet-view="store" hidden>
+    <div class="view-head">
+      <span class="view-tag">Согласуем: видимость статусов обмена данными с 1С и Sales Navigator</span>
+      <h1 class="view-title">Обмен и интеграции</h1>
+      <p class="view-sub">Статусы синхронизации и журнал последних передач</p>
+    </div>
+
+    <div class="grid grid-3" style="margin-bottom:20px;">
+      <div class="card card-pad">
+        <div class="flex-between" style="margin-bottom:10px;">
+          <b>1С — выгрузка заказов</b>
+          <span class="badge badge-success badge-dot">ок</span>
+        </div>
+        <p class="text-sm text-muted">XML-обмен заказов покупателей и остатков</p>
+        <p class="text-sm" style="margin-top:8px;">Последняя синхронизация: <b>сегодня, 10:12</b></p>
+      </div>
+      <div class="card card-pad">
+        <div class="flex-between" style="margin-bottom:10px;">
+          <b>Sales Navigator — фид</b>
+          <span class="badge badge-success badge-dot">ок</span>
+        </div>
+        <p class="text-sm text-muted">Данные по сделкам и оплатам для аналитики продаж</p>
+        <p class="text-sm" style="margin-top:8px;">Последняя синхронизация: <b>сегодня, 09:40</b></p>
+      </div>
+      <div class="card card-pad">
+        <div class="flex-between" style="margin-bottom:10px;">
+          <b>Лид-бот (Telegram/Avito)</b>
+          <span class="badge badge-danger badge-dot">ошибка</span>
+        </div>
+        <p class="text-sm text-muted">Приём заявок из мессенджеров и Avito</p>
+        <p class="text-sm" style="margin-top:8px; color:var(--danger);">Требует действия: повторить попытку</p>
+      </div>
+    </div>
+
+    <div class="card card-pad">
+      <div class="card-head"><h3>Журнал последних передач</h3></div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Время</th><th>Система</th><th>Тип</th><th>Результат</th><th>Действие</th></tr></thead>
+          <tbody>
+            <tr><td class="cell-muted">10:12</td><td>1С</td><td>Выгрузка заказов (12 шт)</td><td><span class="badge badge-success">ок</span></td><td>—</td></tr>
+            <tr><td class="cell-muted">09:40</td><td>Sales Navigator</td><td>Фид сделок и оплат</td><td><span class="badge badge-success">ок</span></td><td>—</td></tr>
+            <tr><td class="cell-muted">09:15</td><td>Лид-бот</td><td>Импорт заявок Avito</td><td><span class="badge badge-danger">ошибка</span></td><td><button class="btn btn-sm">Повторить</button></td></tr>
+            <tr><td class="cell-muted">08:00</td><td>1С</td><td>Обновление остатков и цен</td><td><span class="badge badge-success">ок</span></td><td>—</td></tr>
+            <tr><td class="cell-muted">вчера 22:00</td><td>1С</td><td>Ночная полная синхронизация</td><td><span class="badge badge-success">ок</span></td><td>—</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========================================================= -->
+  <!-- 11. ОТЧЁТЫ И АНАЛИТИКА -->
+  <!-- ========================================================= -->
+  <section class="view" id="view-store-reports" data-cabinet-view="store" hidden>
+    <div class="view-head">
+      <span class="view-tag">Согласуем: набор графиков для еженедельного разбора продаж</span>
+      <h1 class="view-title">Отчёты и аналитика</h1>
+      <p class="view-sub">Сентябрь 2026</p>
+    </div>
+
+    <div class="grid grid-2" style="align-items:start;">
+      <div class="card card-pad">
+        <div class="card-head"><h3>Воронка продаж</h3></div>
+        <div class="mini-funnel">
+          <div class="mf-row"><div class="mf-label">Встреча</div><div class="mf-bar-track"><div class="mf-bar-fill" style="width:100%"></div></div><div class="mf-value num">210</div></div>
+          <div class="mf-row"><div class="mf-label">Замер</div><div class="mf-bar-track"><div class="mf-bar-fill" style="width:80%"></div></div><div class="mf-value num">168</div></div>
+          <div class="mf-row"><div class="mf-label">Оплата</div><div class="mf-bar-track"><div class="mf-bar-fill" style="width:58%"></div></div><div class="mf-value num">122</div></div>
+          <div class="mf-row"><div class="mf-label">Доставка</div><div class="mf-bar-track"><div class="mf-bar-fill" style="width:50%"></div></div><div class="mf-value num">105</div></div>
+          <div class="mf-row"><div class="mf-label">Установка</div><div class="mf-bar-track"><div class="mf-bar-fill" style="width:46%"></div></div><div class="mf-value num">96</div></div>
+          <div class="mf-row"><div class="mf-label">Выполнено</div><div class="mf-bar-track"><div class="mf-bar-fill" style="width:38%"></div></div><div class="mf-value num">81</div></div>
+        </div>
+      </div>
+
+      <div class="card card-pad">
+        <div class="card-head"><h3>Конверсия по стадиям, %</h3></div>
+        <div class="bar-chart">
+          <div class="bar-col"><div class="bar-val num">80%</div><div class="bar" style="height:80%"></div><div class="bar-lbl">Замер</div></div>
+          <div class="bar-col"><div class="bar-val num">73%</div><div class="bar" style="height:73%"></div><div class="bar-lbl">Оплата</div></div>
+          <div class="bar-col"><div class="bar-val num">86%</div><div class="bar" style="height:86%"></div><div class="bar-lbl">Доставка</div></div>
+          <div class="bar-col"><div class="bar-val num">91%</div><div class="bar" style="height:91%"></div><div class="bar-lbl">Установка</div></div>
+          <div class="bar-col"><div class="bar-val num">84%</div><div class="bar" style="height:84%"></div><div class="bar-lbl">Выполнено</div></div>
+        </div>
+      </div>
+
+      <div class="card card-pad">
+        <div class="card-head"><h3>Причины отказа</h3></div>
+        <div class="bar-chart" style="height:180px;">
+          <div class="bar-col"><div class="bar-val num">34%</div><div class="bar" style="height:75%;background:linear-gradient(180deg,var(--danger),#7f1d1d)"></div><div class="bar-lbl">Дорого</div></div>
+          <div class="bar-col"><div class="bar-val num">22%</div><div class="bar" style="height:48%;background:linear-gradient(180deg,var(--danger),#7f1d1d)"></div><div class="bar-lbl">Долгий срок</div></div>
+          <div class="bar-col"><div class="bar-val num">18%</div><div class="bar" style="height:40%;background:linear-gradient(180deg,var(--danger),#7f1d1d)"></div><div class="bar-lbl">Выбрал другого</div></div>
+          <div class="bar-col"><div class="bar-val num">16%</div><div class="bar" style="height:35%;background:linear-gradient(180deg,var(--danger),#7f1d1d)"></div><div class="bar-lbl">Передумал</div></div>
+          <div class="bar-col"><div class="bar-val num">10%</div><div class="bar" style="height:22%;background:linear-gradient(180deg,var(--danger),#7f1d1d)"></div><div class="bar-lbl">Другое</div></div>
+        </div>
+      </div>
+
+      <div class="card card-pad" id="reportEmptyCard">
+        <div class="card-head"><h3>Сравнение магазинов сети</h3></div>
+        <div id="reportSkeleton">
+          <div class="skeleton" style="height:18px;width:60%;margin-bottom:12px;"></div>
+          <div class="skeleton" style="height:160px;width:100%;"></div>
+        </div>
+        <div id="reportLoaded" hidden>
+          <div class="empty-state">
+            <svg viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75z"/></svg>
+            <b>Нет данных за выбранный период</b>
+            <span class="text-sm">Сеть подключит вторую точку — сравнение появится автоматически</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card card-pad" style="margin-top:16px;">
+      <div class="card-head"><h3>Доходность по месяцу</h3></div>
+      <div class="legend">
+        <div class="legend-item"><span class="legend-dot" style="background:var(--accent)"></span>Выручка</div>
+        <div class="legend-item"><span class="legend-dot" style="background:var(--success)"></span>Маржа</div>
+      </div>
+      <div class="bar-chart">
+        <div class="bar-col"><div class="bar-val num">3,6М</div><div class="bar" style="height:70%"></div><div class="bar-lbl">Июнь</div></div>
+        <div class="bar-col"><div class="bar-val num">3,9М</div><div class="bar" style="height:76%"></div><div class="bar-lbl">Июль</div></div>
+        <div class="bar-col"><div class="bar-val num">3,7М</div><div class="bar" style="height:72%"></div><div class="bar-lbl">Август</div></div>
+        <div class="bar-col"><div class="bar-val num">4,2М</div><div class="bar" style="height:84%"></div><div class="bar-lbl">Сентябрь</div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========================================================= -->
+  <!-- 12. БИЛЛИНГ И ПОДПИСКА -->
+  <!-- ========================================================= -->
+  <section class="view" id="view-store-billing" data-cabinet-view="store" hidden>
+    <div class="view-head">
+      <span class="view-tag">Согласуем: пакеты подписки и то, как магазин видит свои счета</span>
+      <h1 class="view-title">Биллинг и подписка</h1>
+      <p class="view-sub">Текущий пакет — «Магазин». Платёжный шлюз в прототипе — заглушка</p>
+    </div>
+
+    <div class="grid grid-4" style="margin-bottom:20px;">
+      <div class="card card-pad">
+        <b>Расчёты</b>
+        <div class="kpi-value num" style="font-size:22px;margin:10px 0;">4 900 ₽<span class="text-sm text-muted num">/мес</span></div>
+        <p class="text-sm text-muted">Только 4 цены + конфигуратор, без CRM</p>
+      </div>
+      <div class="card card-pad" style="border-color:var(--accent); box-shadow:0 0 0 2px var(--accent-soft);">
+        <div class="flex-between"><b>Магазин</b><span class="badge badge-accent">Текущий</span></div>
+        <div class="kpi-value num" style="font-size:22px;margin:10px 0;">19 900 ₽<span class="text-sm text-muted num">/мес</span></div>
+        <p class="text-sm text-muted">CRM, воронка, бланки, конфигуратор, обмен с 1С</p>
+      </div>
+      <div class="card card-pad">
+        <b>Сеть</b>
+        <div class="kpi-value num" style="font-size:22px;margin:10px 0;">от 49 900 ₽<span class="text-sm text-muted num">/мес</span></div>
+        <p class="text-sm text-muted">Несколько точек, сравнение, единая аналитика</p>
+      </div>
+      <div class="card card-pad">
+        <b>Производитель</b>
+        <div class="kpi-value num" style="font-size:22px;margin:10px 0;">14 900 ₽<span class="text-sm text-muted num">/мес</span></div>
+        <p class="text-sm text-muted">Приём заказов от магазинов-партнёров</p>
+      </div>
+    </div>
+
+    <div class="grid grid-2" style="align-items:start;">
+      <div class="card card-pad">
+        <div class="card-head"><h3>Подключённые фабрики</h3></div>
+        <div class="list">
+          <div class="list-item"><div class="list-main"><div class="list-title">Гефест</div><div class="list-sub">Прайс и остатки — синхронизировано сегодня</div></div><span class="badge badge-success">Активна</span></div>
+          <div class="list-item"><div class="list-main"><div class="list-title">Океан</div><div class="list-sub">Прайс и остатки — синхронизировано сегодня</div></div><span class="badge badge-success">Активна</span></div>
+          <div class="list-item"><div class="list-main"><div class="list-title">Перфекто</div><div class="list-sub">Ожидает подключения EDI</div></div><span class="badge badge-warning">Настройка</span></div>
+        </div>
+      </div>
+
+      <div class="card card-pad">
+        <div class="card-head"><h3>Счета</h3></div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>№</th><th>Период</th><th>Сумма</th><th>Статус</th></tr></thead>
+            <tbody>
+              <tr><td>СЧ-0921</td><td>Сентябрь 2026</td><td class="num">19 900 ₽</td><td><span class="badge badge-success">Оплачен</span></td></tr>
+              <tr><td>СЧ-0824</td><td>Август 2026</td><td class="num">19 900 ₽</td><td><span class="badge badge-success">Оплачен</span></td></tr>
+              <tr><td>СЧ-1021</td><td>Октябрь 2026</td><td class="num">19 900 ₽</td><td><span class="badge badge-warning">Ожидает</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p class="text-sm text-muted" style="margin-top:12px;">Платёжный шлюз — заглушка прототипа, реальные списания не выполняются</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========================================================= -->
+  <!-- 13. ВНЕШНИЕ ИСПОЛНИТЕЛИ -->
+  <!-- ========================================================= -->
+  <section class="view" id="view-store-contractors" data-cabinet-view="store" hidden>
+    <div class="view-head">
+      <span class="view-tag">Согласуем: работу с замерщиками/монтажниками без их регистрации в системе</span>
+      <h1 class="view-title">Внешние исполнители</h1>
+      <p class="view-sub">Задание отправляется разовой ссылкой, без личного кабинета исполнителя</p>
+    </div>
+
+    <div class="table-wrap card">
+      <table>
+        <thead><tr><th>Исполнитель</th><th>Роль</th><th>Текущее задание</th><th>Ссылка</th><th>Статус</th></tr></thead>
+        <tbody>
+          <tr><td class="cell-strong">Лихарстов В. П.</td><td>Замерщик</td><td>Крылов Д., №4128, сегодня 18:00</td><td><a href="#" onclick="return false;">Открыть ссылку</a></td><td><span class="badge badge-warning">Отправлено</span></td></tr>
+          <tr><td class="cell-strong">Монтажная бригада №2</td><td>Монтаж</td><td>Соловьёва М., №4061</td><td><a href="#" onclick="return false;">Открыть ссылку</a></td><td><span class="badge badge-success">Подтверждено выполнение</span></td></tr>
+          <tr><td class="cell-strong">Служба доставки «Экспресс-Дон»</td><td>Доставка</td><td>ООО «СтройГрад», №4076</td><td><a href="#" onclick="return false;">Открыть ссылку</a></td><td><span class="badge badge-neutral">Ожидает подтверждения</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="card card-pad" style="margin-top:16px;">
+      <div class="card-head"><h3>Новое задание</h3></div>
+      <div class="field-grid">
+        <div class="field"><label>Исполнитель</label><select><option>Лихарстов В. П. — замерщик</option><option>Монтажная бригада №2</option><option>Служба доставки «Экспресс-Дон»</option></select></div>
+        <div class="field"><label>Сделка</label><input type="text" value="№4128 — Дмитрий Крылов"></div>
+        <div class="field"><label>Дата и время</label><input type="text" value="сегодня, 18:00"></div>
+        <div class="field"><label>Комментарий</label><input type="text" placeholder="Что важно передать исполнителю"></div>
+      </div>
+      <button class="btn btn-primary">Сформировать разовую ссылку</button>
+    </div>
+  </section>
+
+  <!-- ========================================================= -->
+  <!-- 14. НАСТРОЙКИ -->
+  <!-- ========================================================= -->
+  <section class="view" id="view-store-settings" data-cabinet-view="store" hidden>
+    <div class="view-head">
+      <span class="view-tag">Согласуем: реквизиты, наценку, сотрудников и права доступа к закупочной цене</span>
+      <h1 class="view-title">Настройки</h1>
+    </div>
+
+    <div class="grid grid-2" style="align-items:start; margin-bottom:16px;">
+      <div class="card card-pad">
+        <div class="card-head"><h3>Реквизиты магазина</h3></div>
+        <div class="field-grid">
+          <div class="field"><label>Название</label><input type="text" value="Магазин «Стачки, 245»"></div>
+          <div class="field"><label>Бренд / логотип</label><input type="text" value="1 Гипермаркет Дверей"></div>
+          <div class="field"><label>Адрес</label><input type="text" value="г. Ростов-на-Дону, ул. Стачки, 245"></div>
+          <div class="field"><label>Телефон</label><input type="tel" value="+7 863 200-00-00"></div>
+        </div>
+      </div>
+      <div class="card card-pad">
+        <div class="card-head"><h3>Свои цены</h3></div>
+        <div class="field"><label>Наценка от РРЦ, %</label><input type="text" value="−6% (Продажная цена ниже РРЦ)"></div>
+        <div class="field"><label>Скидка менеджера без согласования, %</label><input type="text" value="до 5%"></div>
+        <div class="field"><label>Кастом-поля сделки</label><input type="text" value="Этаж, наличие лифта, код домофона"></div>
+      </div>
+    </div>
+
+    <div class="card card-pad">
+      <div class="card-head"><h3>Сотрудники и роли</h3></div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Сотрудник</th><th>Роль</th><th>Сделки</th><th>Закупочная цена</th><th>Отчёты</th><th>Настройки</th></tr></thead>
+          <tbody>
+            <tr><td class="cell-strong">Ирина Соколова</td><td>Менеджер</td><td><svg class="icon icon-sm" style="color:var(--success)" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg></td><td><svg class="icon icon-sm" style="color:var(--border)" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg></td><td><svg class="icon icon-sm" style="color:var(--border)" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg></td><td><svg class="icon icon-sm" style="color:var(--border)" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg></td></tr>
+            <tr><td class="cell-strong">Максим Петров</td><td>Менеджер</td><td><svg class="icon icon-sm" style="color:var(--success)" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg></td><td><svg class="icon icon-sm" style="color:var(--border)" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg></td><td><svg class="icon icon-sm" style="color:var(--border)" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg></td><td><svg class="icon icon-sm" style="color:var(--border)" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg></td></tr>
+            <tr><td class="cell-strong">Артём Волков</td><td>Руководитель точки</td><td><svg class="icon icon-sm" style="color:var(--success)" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg></td><td><svg class="icon icon-sm" style="color:var(--success)" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg></td><td><svg class="icon icon-sm" style="color:var(--success)" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg></td><td><svg class="icon icon-sm" style="color:var(--border)" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg></td></tr>
+            <tr><td class="cell-strong">Алекс Курусин</td><td>Владелец</td><td><svg class="icon icon-sm" style="color:var(--success)" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg></td><td><svg class="icon icon-sm" style="color:var(--success)" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg></td><td><svg class="icon icon-sm" style="color:var(--success)" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg></td><td><svg class="icon icon-sm" style="color:var(--success)" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg></td></tr>
+          </tbody>
+        </table>
+      </div>
+      <button class="btn" style="margin-top:14px;"><svg class="icon icon-sm" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/></svg>Пригласить сотрудника</button>
+    </div>
+  </section>
+
+  <!-- ========================================================= -->
+  <!-- КАБИНЕТ «ПОКУПАТЕЛЬ» -->
+  <!-- ========================================================= -->
+  <section class="view" id="view-buyer-order" data-cabinet-view="buyer" hidden>
+    <div class="view-head">
+      <span class="view-tag">Согласуем: что видит клиент по своему заказу — без доступа к внутренним ценам</span>
+      <h1 class="view-title">Мой заказ №4128</h1>
+      <p class="view-sub">Магазин «Стачки, 245» · менеджер Максим Петров</p>
+    </div>
+
+    <div class="grid grid-2" style="align-items:start;">
+      <div class="card card-pad">
+        <div class="card-head"><h3>Комплектация</h3></div>
+        <div class="list">
+          <div class="list-item"><div class="list-main"><div class="list-title">Входная дверь Гефест «Термо» 960×2050</div><div class="list-sub">Терморазрыв, усиленный замок</div></div></div>
+          <div class="list-item"><div class="list-main"><div class="list-title">Короб + наличники стандартные</div></div></div>
+          <div class="list-item"><div class="list-main"><div class="list-title">Установка и вывоз мусора</div></div></div>
+        </div>
+        <div class="divider-h"></div>
+        <div class="flex-between"><span>Стоимость заказа</span><span class="num cell-strong">42 000 ₽</span></div>
+        <div class="flex-between" style="margin-top:6px;"><span>Оплачено</span><span class="num" style="color:var(--success)">21 000 ₽</span></div>
+        <div class="flex-between" style="margin-top:6px;"><span>Осталось внести</span><span class="num" style="color:var(--warning)">21 000 ₽</span></div>
+      </div>
+
+      <div class="card card-pad">
+        <div class="card-head"><h3>Статус и сроки</h3></div>
+        <div class="stepper">
+          <div class="step done"><div class="dot">✓</div><div class="line"></div><div class="lbl">Заказано</div></div>
+          <div class="step done"><div class="dot">✓</div><div class="line"></div><div class="lbl">В поставке</div></div>
+          <div class="step current"><div class="dot">3</div><div class="line"></div><div class="lbl">Готово к монтажу</div></div>
+          <div class="step"><div class="dot">4</div><div class="line"></div><div class="lbl">Установлено</div></div>
+          <div class="step"><div class="dot">5</div><div class="lbl">Принято</div></div>
+        </div>
+        <p class="text-sm text-muted" style="margin-top:16px;">Ориентировочная дата монтажа: <b>30 сентября</b></p>
+        <div class="divider-h"></div>
+        <div class="card-head" style="margin-bottom:8px;"><h3 style="font-size:13px;">Документы</h3></div>
+        <div class="list">
+          <div class="list-item"><div class="list-main"><div class="list-title">Договор №4128 от 21.09.2026</div></div><a href="#" onclick="return false;" class="text-sm">Скачать</a></div>
+          <div class="list-item"><div class="list-main"><div class="list-title">Чек об оплате аванса</div></div><a href="#" onclick="return false;" class="text-sm">Скачать</a></div>
+        </div>
+        <button class="btn btn-accent btn-block" style="margin-top:16px;"><svg class="icon icon-sm" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8.625 12a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H8.25m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H12m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0h-.375M21 12c0 4.556-4.03 8.25-9 8.25a9.764 9.764 0 01-2.555-.337A5.972 5.972 0 015.41 20.97a5.969 5.969 0 01-.474-.065 4.48 4.48 0 00.978-2.025c.09-.457-.133-.901-.467-1.226C3.93 16.178 3 14.189 3 12c0-4.556 4.03-8.25 9-8.25s9 3.694 9 8.25z"/></svg>Написать менеджеру</button>
+      </div>
+    </div>
+  </section>
+
+  <section class="view" id="view-buyer-docs" data-cabinet-view="buyer" hidden>
+    <div class="view-head">
+      <span class="view-tag">Согласуем: раздел документов клиента</span>
+      <h1 class="view-title">Документы</h1>
+    </div>
+    <div class="table-wrap card">
+      <table>
+        <thead><tr><th>Документ</th><th>Дата</th><th>Статус</th><th></th></tr></thead>
+        <tbody>
+          <tr><td class="cell-strong">Договор №4128</td><td class="cell-muted">21.09.2026</td><td><span class="badge badge-success">Подписан</span></td><td><a href="#" onclick="return false;">Скачать</a></td></tr>
+          <tr><td class="cell-strong">Чек об оплате аванса</td><td class="cell-muted">21.09.2026</td><td><span class="badge badge-success">Оплачено</span></td><td><a href="#" onclick="return false;">Скачать</a></td></tr>
+          <tr><td class="cell-strong">Акт выполненных работ</td><td class="cell-muted">—</td><td><span class="badge badge-neutral">Ожидает монтажа</span></td><td>—</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="view" id="view-buyer-support" data-cabinet-view="buyer" hidden>
+    <div class="view-head">
+      <span class="view-tag">Согласуем: прямой контакт клиента с менеджером без звонка на общий номер</span>
+      <h1 class="view-title">Написать менеджеру</h1>
+    </div>
+    <div class="card card-pad" style="max-width:560px;">
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;">
+        <div class="avatar">МП</div>
+        <div><b>Максим Петров</b><div class="text-sm text-muted">Ваш менеджер · отвечает обычно за 15 минут</div></div>
+      </div>
+      <div class="field"><label>Сообщение</label><textarea placeholder="Например: когда приедет замерщик?"></textarea></div>
+      <button class="btn btn-primary">Отправить в WhatsApp</button>
+    </div>
+  </section>
+
+  <!-- ========================================================= -->
+  <!-- КАБИНЕТ «ПРОИЗВОДИТЕЛЬ» -->
+  <!-- ========================================================= -->
+  <section class="view" id="view-manufacturer-orders" data-cabinet-view="manufacturer" hidden>
+    <div class="view-head">
+      <span class="view-tag">Согласуем: как фабрика видит входящие заказы от магазинов-партнёров</span>
+      <h1 class="view-title">Заказы от магазинов</h1>
+      <p class="view-sub">Фабрика «Гефест» · 6 магазинов-партнёров подключены</p>
+    </div>
+    <div class="table-wrap card">
+      <table>
+        <thead><tr><th>№ заказа</th><th>Магазин</th><th>Модель</th><th>Кол-во</th><th>Сумма закупки</th><th>Срок отгрузки</th><th>Статус</th></tr></thead>
+        <tbody>
+          <tr><td class="cell-strong">З-11824</td><td>Стачки, 245</td><td>Термо 960×2050</td><td class="num">1</td><td class="num">27 400 ₽</td><td class="cell-muted">30.09</td><td><span class="badge badge-warning">В производстве</span></td></tr>
+          <tr><td class="cell-strong">З-11809</td><td>Таганрогская</td><td>Ультра 860×2050</td><td class="num">4</td><td class="num">142 000 ₽</td><td class="cell-muted">28.09</td><td><span class="badge badge-accent">Новый</span></td></tr>
+          <tr><td class="cell-strong">З-11790</td><td>ХДМ-Аксайский</td><td>Форт 960×2050</td><td class="num">2</td><td class="num">58 000 ₽</td><td class="cell-muted">24.09</td><td><span class="badge badge-success">Отгружен</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="view" id="view-manufacturer-catalog" data-cabinet-view="manufacturer" hidden>
+    <div class="view-head">
+      <span class="view-tag">Согласуем: прайс и остатки, которые фабрика отдаёт партнёрам</span>
+      <h1 class="view-title">Прайс и остатки</h1>
+    </div>
+    <div class="table-wrap card">
+      <table>
+        <thead><tr><th>Модель</th><th>РРЦ</th><th>Цена партнёра</th><th>Остаток, шт</th></tr></thead>
+        <tbody>
+          <tr><td class="cell-strong">Термо 960×2050</td><td class="num">48 000 ₽</td><td class="num">27 400 ₽</td><td class="num">14</td></tr>
+          <tr><td class="cell-strong">Форт 860×2050</td><td class="num">35 000 ₽</td><td class="num">19 800 ₽</td><td class="num">22</td></tr>
+          <tr><td class="cell-strong">Ультра 1060×2050</td><td class="num">61 500 ₽</td><td class="num">36 200 ₽</td><td class="num">6</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="view" id="view-manufacturer-docs" data-cabinet-view="manufacturer" hidden>
+    <div class="view-head">
+      <span class="view-tag">Согласуем: документооборот фабрики с магазинами</span>
+      <h1 class="view-title">Документы и акты</h1>
+    </div>
+    <div class="table-wrap card">
+      <table>
+        <thead><tr><th>Документ</th><th>Магазин</th><th>Дата</th><th>Статус</th></tr></thead>
+        <tbody>
+          <tr><td class="cell-strong">УПД №9012</td><td>Стачки, 245</td><td class="cell-muted">18.09.2026</td><td><span class="badge badge-success">Подписан</span></td></tr>
+          <tr><td class="cell-strong">Акт сверки Q3</td><td>Таганрогская</td><td class="cell-muted">15.09.2026</td><td><span class="badge badge-warning">На подписании</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- ========================================================= -->
+  <!-- КАБИНЕТ «ПЛАТФОРМА» -->
+  <!-- ========================================================= -->
+  <section class="view" id="view-platform-overview" data-cabinet-view="platform" hidden>
+    <div class="view-head">
+      <span class="view-tag">Согласуем: как оператор SaaS видит всю сеть подключённых магазинов</span>
+      <h1 class="view-title">Обзор сети магазинов</h1>
+      <p class="view-sub">12 активных тенантов · 3 на пробном периоде</p>
+    </div>
+    <div class="grid grid-4" style="margin-bottom:20px;">
+      <div class="card kpi-card"><div class="kpi-value num">15</div><div class="kpi-label">Всего тенантов</div></div>
+      <div class="card kpi-card"><div class="kpi-value num">238 800 ₽</div><div class="kpi-label">MRR</div></div>
+      <div class="card kpi-card"><div class="kpi-value num">3</div><div class="kpi-label">На триале</div></div>
+      <div class="card kpi-card"><div class="kpi-value num">2</div><div class="kpi-label">Риск оттока</div></div>
+    </div>
+    <div class="table-wrap card">
+      <table>
+        <thead><tr><th>Магазин</th><th>Город</th><th>Пакет</th><th>Пользователей</th><th>Статус</th></tr></thead>
+        <tbody>
+          <tr><td class="cell-strong">1 Гипермаркет Дверей — Стачки</td><td>Ростов-на-Дону</td><td>Магазин</td><td class="num">6</td><td><span class="badge badge-success">Активен</span></td></tr>
+          <tr><td class="cell-strong">1 Гипермаркет Дверей — Сеть (5 точек)</td><td>Ростов-на-Дону</td><td>Сеть</td><td class="num">28</td><td><span class="badge badge-success">Активен</span></td></tr>
+          <tr><td class="cell-strong">ДверьМастер</td><td>Краснодар</td><td>Магазин</td><td class="num">3</td><td><span class="badge badge-warning">Триал, 4 дня</span></td></tr>
+          <tr><td class="cell-strong">Гефест-Опт</td><td>Ростов-на-Дону</td><td>Производитель</td><td class="num">2</td><td><span class="badge badge-success">Активен</span></td></tr>
+          <tr><td class="cell-strong">ДверикЪ</td><td>Таганрог</td><td>Расчёты</td><td class="num">1</td><td><span class="badge badge-danger">Риск оттока</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="view" id="view-platform-billing" data-cabinet-view="platform" hidden>
+    <div class="view-head">
+      <span class="view-tag">Согласуем: сводный биллинг платформы по всем тенантам</span>
+      <h1 class="view-title">Биллинг платформы</h1>
+    </div>
+    <div class="table-wrap card">
+      <table>
+        <thead><tr><th>Тенант</th><th>Пакет</th><th>Сумма</th><th>Статус</th></tr></thead>
+        <tbody>
+          <tr><td class="cell-strong">1 Гипермаркет Дверей — Стачки</td><td>Магазин</td><td class="num">19 900 ₽</td><td><span class="badge badge-success">Оплачен</span></td></tr>
+          <tr><td class="cell-strong">1 Гипермаркет Дверей — Сеть</td><td>Сеть</td><td class="num">49 900 ₽</td><td><span class="badge badge-success">Оплачен</span></td></tr>
+          <tr><td class="cell-strong">Гефест-Опт</td><td>Производитель</td><td class="num">14 900 ₽</td><td><span class="badge badge-warning">Ожидает</span></td></tr>
+          <tr><td class="cell-strong">ДверикЪ</td><td>Расчёты</td><td class="num">4 900 ₽</td><td><span class="badge badge-danger">Просрочен</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="text-sm text-muted" style="margin-top:12px;">Платёжный шлюз — заглушка прототипа</p>
+  </section>
+
+  <section class="view" id="view-platform-integrations" data-cabinet-view="platform" hidden>
+    <div class="view-head">
+      <span class="view-tag">Согласуем: контроль здоровья интеграций у всех тенантов сразу</span>
+      <h1 class="view-title">Мониторинг интеграций</h1>
+    </div>
+    <div class="grid grid-3">
+      <div class="card card-pad"><div class="flex-between"><b>1С — все тенанты</b><span class="badge badge-success badge-dot">ок</span></div><p class="text-sm text-muted" style="margin-top:8px;">14 из 15 синхронизированы вовремя</p></div>
+      <div class="card card-pad"><div class="flex-between"><b>Sales Navigator</b><span class="badge badge-success badge-dot">ок</span></div><p class="text-sm text-muted" style="margin-top:8px;">Фиды приходят по расписанию</p></div>
+      <div class="card card-pad"><div class="flex-between"><b>Лид-боты партнёров</b><span class="badge badge-warning badge-dot">внимание</span></div><p class="text-sm text-muted" style="margin-top:8px;">1 тенант — сбой авторизации Avito API</p></div>
+    </div>
+  </section>
+
+  </main>
+</div>
+
+<div class="toast-wrap" id="toastWrap"></div>
+
+<script>
+(function(){
+  'use strict';
+  var root = document.documentElement;
+  var app = document.getElementById('app');
+  var scrim = document.getElementById('scrim');
+  var main = document.getElementById('main');
+
+  var CABINETS = ['store','buyer','manufacturer','platform'];
+  var DEFAULT_ROUTE = { store:'store-dashboard', buyer:'buyer-order', manufacturer:'manufacturer-orders', platform:'platform-overview' };
+  var STAGES = ['Встреча','Замер','Повторная встреча','Оплата/подписание','Заказной товар','Доставка','Установка','Обратная связь','Оплата получена'];
+
+  /* ===== THEME ===== */
+  var SUN_D = 'M12 3v2.25m6.364.386-1.591 1.591M21 12h-2.25m-.386 6.364-1.591-1.591M12 18.75V21m-4.773-4.227-1.591 1.591M5.25 12H3m4.227-4.773L5.636 5.636M15.75 12a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0z';
+  var MOON_D = 'M21.752 15.002A9.72 9.72 0 0118 15.75c-5.385 0-9.75-4.365-9.75-9.75 0-1.33.266-2.597.748-3.752A9.753 9.753 0 003 11.25C3 16.635 7.365 21 12.75 21a9.753 9.753 0 009.002-5.998z';
+  var themeToggle = document.getElementById('themeToggle');
+  var themeIconPath = document.querySelector('#themeIconSun path');
+
+  function effectiveTheme(){
+    var explicit = root.getAttribute('data-theme');
+    if(explicit) return explicit;
+    return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+  }
+  function updateThemeIcon(){
+    if(!themeIconPath) return;
+    themeIconPath.setAttribute('d', effectiveTheme() === 'dark' ? MOON_D : SUN_D);
+  }
+  function setTheme(t){
+    root.setAttribute('data-theme', t);
+    try{ localStorage.setItem('dvernik-theme', t); }catch(e){}
+    updateThemeIcon();
+  }
+  (function initTheme(){
+    var saved = null;
+    try{ saved = localStorage.getItem('dvernik-theme'); }catch(e){}
+    if(saved === 'light' || saved === 'dark'){ root.setAttribute('data-theme', saved); }
+    updateThemeIcon();
+  })();
+  if(themeToggle){
+    themeToggle.addEventListener('click', function(){
+      setTheme(effectiveTheme() === 'dark' ? 'light' : 'dark');
+    });
+  }
+
+  /* ===== TOAST ===== */
+  var toastWrap = document.getElementById('toastWrap');
+  function showToast(text){
+    if(!toastWrap) return;
+    var t = document.createElement('div');
+    t.className = 'toast';
+    t.textContent = text;
+    toastWrap.appendChild(t);
+    requestAnimationFrame(function(){ t.classList.add('show'); });
+    setTimeout(function(){
+      t.classList.remove('show');
+      setTimeout(function(){ t.remove(); }, 250);
+    }, 2600);
+  }
+
+  /* ===== SIDEBAR / MOBILE SCRIM ===== */
+  function isNarrow(){ return window.matchMedia('(max-width: 1024px)').matches; }
+  function syncScrim(){
+    var open = isNarrow() && !app.classList.contains('sidebar-collapsed');
+    scrim.classList.toggle('show', open);
+  }
+  function toggleSidebar(){
+    app.classList.toggle('sidebar-collapsed');
+    syncScrim();
+  }
+  var sidebarToggle = document.getElementById('sidebarToggle');
+  var sidebarToggleMobile = document.getElementById('sidebarToggleMobile');
+  if(sidebarToggle) sidebarToggle.addEventListener('click', toggleSidebar);
+  if(sidebarToggleMobile) sidebarToggleMobile.addEventListener('click', toggleSidebar);
+  if(scrim) scrim.addEventListener('click', function(){ app.classList.add('sidebar-collapsed'); syncScrim(); });
+  if(isNarrow()) app.classList.add('sidebar-collapsed');
+  window.addEventListener('resize', syncScrim);
+
+  /* ===== CABINET SWITCH ===== */
+  function setCabinetUI(name){
+    root.setAttribute('data-cabinet', name);
+    document.querySelectorAll('#cabinetSwitch button').forEach(function(b){
+      var active = b.dataset.cabinet === name;
+      b.classList.toggle('active', active);
+      b.setAttribute('aria-selected', active ? 'true' : 'false');
+    });
+    document.querySelectorAll('nav.nav[data-nav]').forEach(function(n){
+      n.hidden = n.dataset.nav !== name;
+    });
+  }
+  document.querySelectorAll('#cabinetSwitch button').forEach(function(btn){
+    btn.addEventListener('click', function(){
+      location.hash = '#/' + DEFAULT_ROUTE[btn.dataset.cabinet];
+    });
+  });
+
+  /* ===== ROUTER ===== */
+  function handleRoute(){
+    var id = location.hash.replace(/^#\/?/, '') || DEFAULT_ROUTE.store;
+    var target = document.getElementById('view-' + id);
+    if(!target){ id = DEFAULT_ROUTE.store; target = document.getElementById('view-' + id); }
+    document.querySelectorAll('.view').forEach(function(v){ v.hidden = true; });
+    target.hidden = false;
+    document.querySelectorAll('.nav-item[data-route]').forEach(function(n){
+      n.classList.toggle('active', n.dataset.route === id);
+    });
+    var prefix = id.split('-')[0];
+    if(CABINETS.indexOf(prefix) !== -1) setCabinetUI(prefix);
+    if(isNarrow()){ app.classList.add('sidebar-collapsed'); syncScrim(); }
+    if(main) main.scrollTop = 0;
+  }
+  document.querySelectorAll('.nav-item[data-route]').forEach(function(item){
+    item.addEventListener('click', function(){ location.hash = '#/' + item.dataset.route; });
+  });
+  var helpNav = document.querySelector('.nav-item[data-external-link]');
+  if(helpNav) helpNav.addEventListener('click', function(){ showToast('Раздел справки — вне прототипа'); });
+  window.addEventListener('hashchange', handleRoute);
+  handleRoute();
+
+  /* ===== KANBAN: СМЕНА СТАДИИ ЧЕРЕЗ КЛИК-МЕНЮ ===== */
+  function closeStageMenus(){
+    document.querySelectorAll('.stage-menu').forEach(function(m){ m.remove(); });
+  }
+  window.toggleStageMenu = function(event, btn){
+    event.stopPropagation();
+    var wasOpenForThis = btn._menuOpenNow;
+    closeStageMenus();
+    document.querySelectorAll('.kc-menu-btn').forEach(function(b){ b._menuOpenNow = false; });
+    if(wasOpenForThis) return;
+    var card = btn.closest('.kanban-card');
+    var col = btn.closest('.kanban-col');
+    var currentStage = col ? col.dataset.stage : '';
+    var rect = btn.getBoundingClientRect();
+    var menu = document.createElement('div');
+    menu.className = 'stage-menu';
+    menu.style.position = 'fixed';
+    menu.style.top = (rect.bottom + 4) + 'px';
+    menu.style.right = (window.innerWidth - rect.right) + 'px';
+    STAGES.forEach(function(stage){
+      var b = document.createElement('button');
+      b.type = 'button';
+      b.textContent = stage;
+      if(stage === currentStage) b.classList.add('current');
+      b.addEventListener('click', function(){
+        moveCardToStage(card, stage);
+        closeStageMenus();
+      });
+      menu.appendChild(b);
+    });
+    document.body.appendChild(menu);
+    btn._menuOpenNow = true;
+  };
+  function moveCardToStage(card, stageName){
+    var target = document.querySelector('.kanban-col[data-stage="' + stageName + '"] .kanban-cards');
+    if(!target || !card) return;
+    target.appendChild(card);
+    document.querySelectorAll('.kanban-col').forEach(function(col){
+      var badge = col.querySelector('.kanban-count');
+      if(badge) badge.textContent = col.querySelectorAll('.kanban-card').length;
+    });
+    showToast('Стадия изменена на «' + stageName + '»');
+  }
+  document.addEventListener('click', function(e){
+    if(!e.target.closest('.stage-menu') && !e.target.closest('.kc-menu-btn')) closeStageMenus();
+  });
+
+  /* ===== СДЕЛКА: ПАНЕЛЬ ===== */
+  var dealOverlay = document.getElementById('dealOverlay');
+  window.openDeal = function(){
+    if(!dealOverlay) return;
+    dealOverlay.classList.add('open');
+    dealOverlay.setAttribute('aria-hidden', 'false');
+    document.body.style.overflow = 'hidden';
+  };
+  window.closeDeal = function(){
+    if(!dealOverlay) return;
+    dealOverlay.classList.remove('open');
+    dealOverlay.setAttribute('aria-hidden', 'true');
+    document.body.style.overflow = '';
+  };
+  if(dealOverlay) dealOverlay.addEventListener('click', function(e){ if(e.target === dealOverlay) closeDeal(); });
+
+  /* ===== БЛАНКИ: МОДАЛЬНЫЕ ФОРМЫ ===== */
+  var FORM_TYPES = ['call','vh','mk'];
+  window.openForm = function(type){
+    var m = document.getElementById('modal-' + type);
+    if(m) m.classList.add('open');
+  };
+  window.closeForm = function(type){
+    var m = document.getElementById('modal-' + type);
+    if(m) m.classList.remove('open');
+  };
+  function closeAllForms(){ FORM_TYPES.forEach(window.closeForm); }
+  window.setFormMode = function(type, mode, btn){
+    var modal = document.getElementById('modal-' + type);
+    if(!modal) return;
+    modal.querySelectorAll('[data-mode-btn]').forEach(function(b){ b.classList.remove('btn-accent'); });
+    btn.classList.add('btn-accent');
+    modal.querySelectorAll('[data-mode-panel]').forEach(function(p){
+      p.hidden = p.getAttribute('data-mode-panel') !== mode;
+    });
+  };
+  window.submitForm = function(type){
+    closeForm(type);
+    showToast('Бланк сохранён — карточка сделки создана/обновлена');
+  };
+  FORM_TYPES.forEach(function(type){
+    var m = document.getElementById('modal-' + type);
+    if(m) m.addEventListener('click', function(e){ if(e.target === m) closeForm(type); });
+  });
+
+  document.addEventListener('keydown', function(e){
+    if(e.key === 'Escape'){
+      closeStageMenus();
+      closeDeal();
+      closeAllForms();
+    }
+  });
+
+  /* ===== ТАБЫ (Контакты/Организации) ===== */
+  document.querySelectorAll('.tab-btn').forEach(function(btn){
+    btn.addEventListener('click', function(){
+      var group = btn.closest('.tabs');
+      var section = btn.closest('section, .modal-box, .panel');
+      if(group) group.querySelectorAll('.tab-btn').forEach(function(b){ b.classList.remove('active'); });
+      btn.classList.add('active');
+      if(section){
+        section.querySelectorAll('.tab-panel').forEach(function(p){ p.hidden = (p.id !== btn.dataset.tab); });
+      }
+    });
+  });
+
+  /* ===== ПЕРЕКЛЮЧАТЕЛЬ КОНТАКТ / ОРГАНИЗАЦИЯ В СДЕЛКЕ ===== */
+  document.querySelectorAll('.pill-toggle').forEach(function(group){
+    group.querySelectorAll('button').forEach(function(btn){
+      btn.addEventListener('click', function(){
+        group.querySelectorAll('button').forEach(function(b){ b.classList.remove('active'); });
+        btn.classList.add('active');
+      });
+    });
+  });
+
+  /* ===== ЧЕКБОКСЫ СПИСКОВ ЗАДАЧ ===== */
+  document.addEventListener('click', function(e){
+    var chk = e.target.closest('.list-check');
+    if(chk){
+      var isChecked = chk.classList.toggle('checked');
+      chk.setAttribute('aria-checked', isChecked ? 'true' : 'false');
+    }
+  });
+  document.addEventListener('keydown', function(e){
+    if((e.key === 'Enter' || e.key === ' ') && e.target.classList && e.target.classList.contains('list-check')){
+      e.preventDefault();
+      var isChecked = e.target.classList.toggle('checked');
+      e.target.setAttribute('aria-checked', isChecked ? 'true' : 'false');
+    }
+  });
+
+  /* ===== ГРУППЫ ВЫБОРА (choice-group: радио/чекбоксы) ===== */
+  document.addEventListener('change', function(e){
+    if(!e.target.matches('.choice input')) return;
+    var input = e.target;
+    if(input.type === 'radio' && input.name){
+      document.querySelectorAll('input[name="' + input.name + '"]').forEach(function(inp){
+        var lbl = inp.closest('.choice');
+        if(lbl) lbl.classList.toggle('checked', inp.checked);
+      });
+    } else {
+      var lbl2 = input.closest('.choice');
+      if(lbl2) lbl2.classList.toggle('checked', input.checked);
+    }
+  });
+
+  /* ===== ГЛОБАЛЬНЫЙ ПОИСК (фильтр таблиц текущего раздела) ===== */
+  var globalSearch = document.getElementById('globalSearch');
+  if(globalSearch){
+    globalSearch.addEventListener('input', function(){
+      var q = globalSearch.value.trim().toLowerCase();
+      var visible = document.querySelector('.view:not([hidden])');
+      if(!visible) return;
+      visible.querySelectorAll('tbody tr').forEach(function(row){
+        var text = row.textContent.toLowerCase();
+        row.hidden = q.length > 0 && text.indexOf(q) === -1;
+      });
+    });
+  }
+
+  /* ===== УВЕДОМЛЕНИЯ / ПРОФИЛЬ (демо-заглушки) ===== */
+  var notifBtn = document.getElementById('notifBtn');
+  if(notifBtn) notifBtn.addEventListener('click', function(){ showToast('Новых уведомлений нет'); });
+  var userChip = document.querySelector('.user-chip');
+  if(userChip) userChip.addEventListener('click', function(){ showToast('Профиль менеджера — вне прототипа'); });
+
+  /* ===== SKELETON → ЗАГРУЖЕНО (Отчёты, сравнение магазинов) ===== */
+  window.addEventListener('load', function(){
+    setTimeout(function(){
+      var sk = document.getElementById('reportSkeleton');
+      var ld = document.getElementById('reportLoaded');
+      if(sk && ld){ sk.hidden = true; ld.hidden = false; }
+    }, 1100);
+  });
+
+})();
+</script>
+</body>
+</html>
